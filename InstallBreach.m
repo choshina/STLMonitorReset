@@ -37,8 +37,8 @@ breach_src_dir = [breach_dir filesep 'Core' filesep 'src'];
 stl_src_dir  = [breach_dir filesep '@STL_Formula' filesep 'private' filesep 'src'];
 
 % compile STL mex functions
-fprintf('\nCompiling legacy STL monitoring functions...\n')
-cd(stl_src_dir);
+%fprintf('\nCompiling legacy STL monitoring functions...\n')
+%cd(stl_src_dir);
 
 legacy_functions = { ' lemire_engine.c', ... 
                      ' lemire_nd_engine.c', ...
@@ -50,25 +50,25 @@ legacy_functions = { ' lemire_engine.c', ...
                      ' lim_inf_indx.c', ...
                     };
 
-for ilf = 1:numel(legacy_functions)
-  cmd = [MEX FLAGS '-outdir ..' legacy_functions{ilf}];
-  eval(cmd);
-end
+%for ilf = 1:numel(legacy_functions)
+%  cmd = [MEX FLAGS '-outdir ..' legacy_functions{ilf}];
+%  eval(cmd);
+%end
  
 legacy_functions_time_robustness= {                     
                      ' ltr.c',...
                      ' rtr.c',...
     };
     
-for ilf = 1:numel(legacy_functions_time_robustness)
-  cmd = [MEX FLAGS '-outdir ../../../Core/m_src ' legacy_functions_time_robustness{ilf}];
-  eval(cmd)
-end
+%for ilf = 1:numel(legacy_functions_time_robustness)
+%  cmd = [MEX FLAGS '-outdir ../../../Core/m_src ' legacy_functions_time_robustness{ilf}];
+%  eval(cmd)
+%end
 
 
-cd robusthom;
-fprintf('Compiling offline STL monitoring functions...\n')
-CompileRobusthom;
+%cd robusthom;
+%fprintf('Compiling offline STL monitoring functions...\n')
+%CompileRobusthom;
     
 % compiles cvodes common stuff
 sundials_dir = [breach_dir filesep 'Ext' filesep 'Toolboxes' filesep 'sundials'];
@@ -118,15 +118,15 @@ out_dir = qwrap([breach_src_dir  filesep 'cv_obj']);
 % Compose and execute compilation command for CVodes common files.
 compile_cvodes = [MEX FLAGS '-c -outdir ' out_dir ' ' sundials_inc_flags ' ' sundials_src_files ];
 %fprintf(regexprep(compile_cvodes,'\','\\\\'));
-fprintf('Compiling some more legacy functions...\n');
-eval(compile_cvodes);
+%fprintf('Compiling some more legacy functions...\n');
+%eval(compile_cvodes);
 
 % Compile blitz library
 blitz_dir = [breach_dir filesep 'Ext' filesep 'Toolboxes' filesep 'blitz'];
-cd(blitz_dir);
-try 
-  CompileBlitzLib;
-end
+%cd(blitz_dir);
+%try 
+%  CompileBlitzLib;
+%end
 
 fprintf('Compiling online monitoring functions...\n')
 try 
