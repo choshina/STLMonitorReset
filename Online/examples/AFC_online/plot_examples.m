@@ -7,14 +7,14 @@ BrAFC.Sim(0:.1:40)
 
 Trace = BrAFC.GetTraces();
 idx = FindParam(BrAFC.Sys, {'rob_low', 'rob_up'});
-t = Trace.time;
+t = Trace{1}.time;
 
 %% 
 close 
 figure;
 subplot(3,1,1)
 
-plot(t,Trace.X(1,:)',t(2:end),Trace.X(2,2:end)', 'LineWidth', 4);
+plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'LineWidth', 4);
 set(gca, 'LineWidth', 2, 'FontSize',18)
 
 legend({'AF','AFref'});
@@ -24,8 +24,8 @@ g = title(phi_AFC);
 set(g,'Interpreter','None')
 subplot(3,1,[2 3]);
 hold on;
-stairs(t, Trace.X(idx(2),:)', 'g', 'LineWidth', 2);
-stairs(t, Trace.X(idx(1),:)', 'r', 'LineWidth', 2);
+stairs(t, Trace{1}.X(idx(2),:)', 'g', 'LineWidth', 2);
+stairs(t, Trace{1}.X(idx(1),:)', 'r', 'LineWidth', 2);
 set(gca, 'LineWidth', 2, 'FontSize',14)
 legend({'Upper robustness','Lower robustness'});
 plot(t,0*t,'k')

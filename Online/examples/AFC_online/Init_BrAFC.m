@@ -18,8 +18,8 @@ rob_diff_lim = -inf;
 
 phi_AFC = 'ev_[10, 30] (alw_[5,10] (abs(AF[t]-AFref[t])>1))';
 
-mdl = 'AFC_Online';
-BrAFC = BreachSimulinkSystem(mdl)
+mdl = 'AbstractFuelControl_M1';
+BrAFC = BreachSimulinkSystem(mdl);
 
 Br0 = BrAFC.copy();
 pedal_angle_gen = pulse_signal_gen({'Pedal_Angle'}); % Generate a pulse signal for pedal angle
