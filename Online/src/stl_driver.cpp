@@ -27,7 +27,9 @@ STLDriver::STLDriver()
   lexer(nullptr),
   nb_test_total(0),
   nb_test_pos(0),
-  error_flag(false)
+  error_flag(false),
+  sub_form(""),
+  diagnose(0)
 {
 }
 
@@ -38,7 +40,9 @@ STLDriver::STLDriver(trace_data _trace)
   lexer(nullptr),
   nb_test_total(0),
   nb_test_pos(0),
-  error_flag(false)
+  error_flag(false),
+  sub_form(""),
+  diagnose(0)
 {
 	data = _trace;
 };
@@ -377,6 +381,13 @@ bool STLDriver::dump_test_log_file(const string & filename){
 	}
 
 }
+  
+void STLDriver::set_sub_form(const string &sf){
+    sub_form = sf;
+}
 
+void STLDriver::set_diagnose(double d){
+    diagnose = d;
+}
 
 } // namespace CPSGrader

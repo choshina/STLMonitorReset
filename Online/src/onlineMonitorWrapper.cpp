@@ -22,7 +22,7 @@
 #define MAX_ROB(S)       ssGetSFcnParam(S,MAX_ROB_IDX)
 #define REFRESH_RATE(S)  ssGetSFcnParam(S,REFRESH_IDX)
 #define SUBFORM(S)       ssGetSFcnParam(S,SUBFORM_IDX)
-#define DIAGNOSE(S)      ssGetSFcnParam(S,DIAGNOSE)
+#define DIAGNOSE(S)      ssGetSFcnParam(S,DIAGNOSE_IDX)
 
 #define NPARAMS 6
 
@@ -119,11 +119,11 @@ static void mdlCheckParameters(SimStruct *S)
         if (mxIsEmpty(    ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
             mxIsSparse(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
             mxIsComplex(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
-            mxIsChar( ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
-            mxIsNumeric(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
-            mxIsDouble(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
-            !mxIsLogical(  ssGetSFcnParam(S,DIAGNOSE_IDX))) {
-        ssSetErrorStatus(S,"Parameter diagnose must be a Boolean.");
+            mxIsLogical(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            !mxIsNumeric(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            !mxIsDouble(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsChar( ssGetSFcnParam(S,DIAGNOSE_IDX))) {
+        ssSetErrorStatus(S,"Parameter diagnose must be a positive double.");
         return;
         }
     
@@ -168,6 +168,8 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetSFcnParamTunable(S,SIG_IDX,true);
     ssSetSFcnParamTunable(S,MAX_ROB_IDX,true);
     ssSetSFcnParamTunable(S,REFRESH_IDX,true);
+    ssSetSFcnParamTunable(S,SUBFORM_IDX,true);
+    ssSetSFcnParamTunable(S,DIAGNOSE_IDX,true);
 
     // Specify I/O
     if (!ssSetNumInputPorts(S, 1)) return;
@@ -264,6 +266,10 @@ static void mdlStart(SimStruct *S)
     
     char *signal_buf = mxArrayToString(SIGNAL_STRING(S));
     char *stl_buf = mxArrayToString(STL_STRING(S));   
+
+    char *sf_buf = mxArrayToString(SUBFORM(S));
+    real_T diag = mxGetScalar(DIAGNOSE(S));
+
     string phi_st = "signal "+ string(signal_buf) + "\n" + "phi:=" + string(stl_buf);
     
     mxFree(signal_buf);
@@ -272,7 +278,15 @@ static void mdlStart(SimStruct *S)
     // Store new C++ object in the pointers vector
     STLDriver *stl_driver  = new STLDriver();
     
-    stl_driver->parse_string(phi_st);    
+    stl_driver->parse_string(phi_st);
+
+    stl_driver->set_sub_form(string(sf_buf));
+    stl_driver->set_diagnose(diag);
+
+    //cout<<string(sf_buf)<<endl;
+
+    mxFree(sf_buf);
+
     ssGetPWork(S)[0] = stl_driver;
 
 }

@@ -103,6 +103,12 @@ public:
 	int nb_test_total;
 	bool error_flag;
 
+    /** the selected sub-formula */
+    string sub_form;
+
+    /** the switch of diagnoser */
+    bool diagnose;
+
 	/// CONSTRUCTORS
 
 	/** construct a new parser driver context */
@@ -112,6 +118,12 @@ public:
 	STLDriver(trace_data _trace);
 
 	~STLDriver() {};
+
+    /** set sub_form */
+    void set_sub_form(const string &sf);
+
+    /** set diagnose */
+    void set_diagnose(double);
 
 	/** Create a new trace_tests structure and add it to the queue */
 	void add_trace_test(const string &test_id, const string &trace_cfg, double sim_time, bool visu);
