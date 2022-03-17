@@ -18,6 +18,9 @@ rob_diff_lim = -inf;
 
 phi_AFC = 'ev_[10, 30] (alw_[5,10] (abs(AF[t]-AFref[t])>1))';
 
+subform = 'L';
+diagnoser = true;
+
 mdl = 'AbstractFuelControl_M1';
 BrAFC = BreachSimulinkSystem(mdl);
 

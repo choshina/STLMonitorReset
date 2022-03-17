@@ -14,17 +14,23 @@
 #define STL_IDX 1
 #define MAX_ROB_IDX 2
 #define REFRESH_IDX 3
+#define SUBFORM_IDX 4
+#define DIAGNOSE_IDX 5
 
 #define SIGNAL_STRING(S) ssGetSFcnParam(S,SIG_IDX)
 #define STL_STRING(S)    ssGetSFcnParam(S,STL_IDX)
 #define MAX_ROB(S)       ssGetSFcnParam(S,MAX_ROB_IDX)
 #define REFRESH_RATE(S)  ssGetSFcnParam(S,REFRESH_IDX)
+#define SUBFORM(S)       ssGetSFcnParam(S,SUBFORM_IDX)
+#define DIAGNOSE(S)      ssGetSFcnParam(S,DIAGNOSE)
 
-#define NPARAMS 4
+#define NPARAMS 6
 
-#define NOUTPORT 2
+#define NOUTPORT 4
 #define UP_IDX 0
 #define LOW_IDX 1
+#define VIO_IDX 2
+#define SAT_IDX 3
 
 
 #if !defined(MATLAB_MEX_FILE)
@@ -97,7 +103,30 @@ static void mdlCheckParameters(SimStruct *S)
             mxIsChar( ssGetSFcnParam(S,REFRESH_IDX))) {
         ssSetErrorStatus(S,"Parameter refresh rate must be a positive double.");
         return;
-    }
+        }
+
+        if (mxIsEmpty(    ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            mxIsSparse(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            mxIsComplex(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            mxIsLogical(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            mxIsNumeric(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            mxIsDouble(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
+            !mxIsChar( ssGetSFcnParam(S,SUBFORM_IDX))) {
+        ssSetErrorStatus(S,"Parameter sub-form must be a string.");
+        return;
+        }
+
+        if (mxIsEmpty(    ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsSparse(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsComplex(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsChar( ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsNumeric(  ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            mxIsDouble(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
+            !mxIsLogical(  ssGetSFcnParam(S,DIAGNOSE_IDX))) {
+        ssSetErrorStatus(S,"Parameter diagnose must be a Boolean.");
+        return;
+        }
+    
 
     
     char *signal_buf = mxArrayToString(SIGNAL_STRING(S));
