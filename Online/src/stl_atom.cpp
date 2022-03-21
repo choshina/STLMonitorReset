@@ -53,6 +53,18 @@ namespace CPSGrader {
 
         return z.front().value;
     }
+
+    void stl_atom::collect_vio_epoch(vector<double>& vset, double t){
+        if(get_zup(t)< 0){
+            vset.push_back(t);
+        }
+    }
+
+    void stl_atom::collect_sat_epoch(vector<double>& sset, double t){
+        if(get_zlow(t)> 0){
+            sset.push_back(t);
+        }
+    }
     
     double signal_transducer::compute_robustness() {
 #ifdef DEBUG__

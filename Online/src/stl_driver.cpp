@@ -390,4 +390,33 @@ void STLDriver::set_diagnose(double d){
     diagnose = d;
 }
 
+void STLDriver::set_epoch(const vector<double> &epo){
+    int old_size = epoch.size();
+    int new_size = epo.size();
+
+    epoch = epo;
+
+    if(new_size == old_size && diagnose == 2){ //reset
+        double reset_loc = epo.back();
+        reset_monitor(reset_loc);
+        cout<<"RESET NOW!!";
+    }
+}
+
+void STLDriver::reset_monitor(double where){
+    //shift data
+    vector<vector<double>> new_data;
+    for(auto ii = data.begin(); ii!= data.end(); ii++){
+        if((*ii).front() >= where){
+            vector<double> pp;
+            pp.push_back((*ii).front() - where);
+            for(auto jj = (*ii).begin() + 1; jj!= (*ii).end(); jj ++){
+                pp.push_back(*jj);
+            }
+            new_data.push_back(pp);
+        }
+    }
+    data = new_data;
+}
+
 } // namespace CPSGrader

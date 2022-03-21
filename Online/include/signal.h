@@ -89,6 +89,8 @@ public:
     void addLastSample(); // add a sample at endTime. 
 	void removeInf();
 
+    double get_value(double);
+
 
 	// write signal to file
 	void dumpFile(const string filename) const {

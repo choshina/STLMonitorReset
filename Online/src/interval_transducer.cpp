@@ -19,6 +19,11 @@ namespace CPSGrader {
         }
         else
             z_low = z;
+
+         
+        //if(trace_data_ptr->back().front() == 28){
+        //    cout<<z<<endl;
+        //}
 #ifdef DEBUG__
         printf( "<  transducer:computer_lower_rob              OUT.\n");
 #endif
@@ -74,6 +79,42 @@ namespace CPSGrader {
         return z_up.front().value;
     };
 
+    void and_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        if (get_zup(t) < 0){
+            if(selected){
+                vset.push_back(t);
+            }else{
+                if(selected_str.front() == 'L'){
+                    if(childL->get_zup(t) < 0){
+                        childL->collect_vio_epoch(vset, t);
+                    }
+                }else{
+                    if(childR->get_zup(t) < 0){
+                        childR->collect_vio_epoch(vset, t);
+                    }
+                }
+            }
+        }
+    }
+
+    void and_transducer::collect_sat_epoch(vector<double>& sset, double t){
+        if (get_zlow(t) > 0){
+            if(selected){
+                sset.push_back(t);
+            }else{
+                if(selected_str.front() == 'L'){
+                    if(childL->get_zlow(t) > 0){
+                        childL->collect_sat_epoch(sset, t);
+                    }
+                }else{
+                    if(childR->get_zlow(t) > 0){
+                        childR->collect_sat_epoch(sset, t);
+                    }
+                }
+            }
+        }
+    }
+
     
     double or_transducer::compute_lower_rob(){
         childL->compute_lower_rob();
@@ -95,6 +136,42 @@ namespace CPSGrader {
 		
         return z_up.front().value;
     };
+
+    void or_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        if (get_zup(t) < 0){
+            if(selected){
+                vset.push_back(t);
+            }else{
+                if(selected_str.front() == 'L'){
+                    if(childL->get_zup(t) < 0){
+                        childL->collect_vio_epoch(vset, t);
+                    }
+                }else{
+                    if(childR->get_zup(t) < 0){
+                        childR->collect_vio_epoch(vset, t);
+                    }
+                }
+            }
+        }
+    }
+
+    void or_transducer::collect_sat_epoch(vector<double>& sset, double t){
+        if (get_zlow(t) > 0){
+            if(selected){
+                sset.push_back(t);
+            }else{
+                if(selected_str.front() == 'L'){
+                    if(childL->get_zlow(t) > 0){
+                        childL->collect_sat_epoch(sset, t);
+                    }
+                }else{
+                    if(childR->get_zlow(t) > 0){
+                        childR->collect_sat_epoch(sset, t);
+                    }
+                }
+            }
+        }
+    }
 
 // IMPLIES transducer
     double implies_transducer::compute_lower_rob(){
@@ -144,6 +221,14 @@ namespace CPSGrader {
         }
         z_low.compute_not(child->z_up);
         return z_low.front().value;
+    }
+
+    void not_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        child->collect_sat_epoch(vset, t);
+    }
+
+    void not_transducer::collect_sat_epoch(vector<double>& sset, double t){
+        child->collect_vio_epoch(sset, t);
     }
 
     // EVENTUALLY
@@ -216,6 +301,42 @@ namespace CPSGrader {
         return z_up.front().value;
     }
 
+    void ev_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        double a,b;
+        if (!get_param(I->begin_str,a)) a = I->begin;
+        if (!get_param(I->end_str,b)) b = I->end;
+
+        if(get_zup(t) < 0){
+            if(selected){
+                vset.push_back(t);
+            }else{
+                for(double tp = t+ a; tp <= t + b; tp ++){
+                    if(child->get_zup(tp) < 0){
+                        child->collect_vio_epoch(vset, tp);
+                    }
+                }
+            }
+        }
+    }
+
+    void ev_transducer::collect_sat_epoch(vector<double>& sset, double t){
+        double a,b;
+        if (!get_param(I->begin_str,a)) a = I->begin;
+        if (!get_param(I->end_str,b)) b = I->end;
+
+        if(get_zlow(t) > 0){
+            if(selected){
+                sset.push_back(t);
+            }else{
+                for(double tp = t+ a; tp <= t + b; tp ++){
+                    if(child->get_zlow(tp) > 0){
+                        child->collect_sat_epoch(sset, tp);
+                    }
+                }
+            }
+        }
+    }
+
     // ALWAYS
     double alw_transducer::compute_lower_rob() {
         // lower bound on a min operator. Partial info cannot help here. 
@@ -276,6 +397,11 @@ namespace CPSGrader {
         double et =min(z_up.endTime,end_time);
         z_up.resize(start_time,max(start_time,et), 0.);
 
+        //if(trace_data_ptr->back().front()== 28){
+        //    cout<< z << endl << "============" << endl;
+        //    cout<< z_up <<endl;
+        //}
+
         if (z_up.empty()) 
             z_up.appendSample(start_time, TOP); 
 
@@ -285,6 +411,42 @@ namespace CPSGrader {
 #endif
         return z_up.front().value;
 
+    }
+
+    void alw_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        double a,b;
+        if (!get_param(I->begin_str,a)) a = I->begin;
+        if (!get_param(I->end_str,b)) b = I->end;
+
+        if(get_zup(t) < 0){
+            if(selected){
+                vset.push_back(t);
+            }else{
+                for(double tp = t+ a; tp <= t + b; tp ++){
+                    if(child->get_zup(tp) < 0){
+                        child->collect_vio_epoch(vset, tp);
+                    }
+                }
+            }
+        }
+    }
+
+    void alw_transducer::collect_sat_epoch(vector<double>& sset, double t){
+        double a,b;
+        if (!get_param(I->begin_str,a)) a = I->begin;
+        if (!get_param(I->end_str,b)) b = I->end;
+
+        if(get_zlow(t) > 0){
+            if(selected){
+                sset.push_back(t);
+            }else{
+                for(double tp = t+ a; tp <= t + b; tp ++){
+                    if(child->get_zlow(tp) > 0){
+                        child->collect_sat_epoch(sset, tp);
+                    }
+                }
+            }
+        }
     }
 
     // TODO the following is a super conservative implementation - (how) can we do better ?

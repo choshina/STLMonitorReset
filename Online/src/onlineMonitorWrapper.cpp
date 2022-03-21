@@ -236,7 +236,8 @@ static void mdlInitializeConditions(SimStruct *S)
 
     x0[UP_IDX]  =  max_rob;
     x0[LOW_IDX] = -max_rob;
-
+    x0[VIO_IDX] = 0;
+    x0[SAT_IDX] = 0;
 }
 
 
@@ -317,12 +318,35 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     double rob_low= -max_rob;
     Signal z_up, z_low;
      
+    int vio_epoch = 0;
+    int sat_epoch = 0;
+
     if (stl_driver->data.size()>2) {
         transducer *phi = stl_driver->formula_map["phi"]->clone();
         phi->set_trace_data_ptr(stl_driver->data);
+        phi->set_selected_subformula(stl_driver->sub_form);
         
         rob_up  = phi->compute_upper_rob();
-        rob_low = phi->compute_lower_rob();        
+        rob_low = phi->compute_lower_rob();
+
+        vector<double> vio_set;
+        vector<double> sat_set;
+
+        if(stl_driver->diagnose != 0){
+            if(rob_up<0){
+                phi->collect_vio_epoch(vio_set, 0);
+                vio_epoch = vio_set.size();
+                stl_driver->set_epoch(vio_set); //reset done if needed
+
+            }else if(rob_low > 0){
+                phi->collect_sat_epoch(sat_set, 0);
+                sat_epoch = sat_set.size();
+                stl_driver->set_epoch(sat_set); //reset done if needed
+            }
+        }
+
+        //TODO: print the epoch at the last moment.
+
         delete phi;
     }  
    
@@ -333,7 +357,8 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     
     xd[UP_IDX] =  rob_up;
     xd[LOW_IDX] = rob_low;
-
+    xd[VIO_IDX] = vio_epoch;
+    xd[SAT_IDX] = sat_epoch;
 }
 
 
@@ -349,6 +374,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
        
     y[UP_IDX] =  xd[UP_IDX];
     y[LOW_IDX] = xd[LOW_IDX];
+    y[VIO_IDX] = xd[VIO_IDX];
+    y[SAT_IDX] = xd[SAT_IDX];
     
 }
 

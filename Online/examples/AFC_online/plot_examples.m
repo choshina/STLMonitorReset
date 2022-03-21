@@ -1,6 +1,9 @@
 % Run Init_AFC_online first
 %phi_AFC = 'alw_[10, 30] ( ( (abs(AF[t]-AFref[t]) > 0.1)) => (ev_[0, 5] (abs(AF[t]-AFref[t]) < 0.1)))';
-phi_AFC = 'alw_[10, 30](AF[t]< 14.8)';
+phi_AFC = 'alw_[10, 30](AF[t]< 14.71)';
+%phi_AFC = 'alw_[0,30](alw_[0,5](AF[t]<14.8))';
+subform = 'M';
+diagnoser = 0;
 
 BrAFC.ResetSimulations();
 BrAFC.SetParam({'max_rob','Pedal_Angle_pulse_period', 'Pedal_Angle_pulse_amp'}, [.5, 12, 50]);

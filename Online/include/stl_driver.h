@@ -107,7 +107,11 @@ public:
     string sub_form;
 
     /** the switch of diagnoser */
-    bool diagnose;
+    //0: no epoch collection 1: collect epoch but no reset 2: collect and reset
+    double diagnose;
+
+    /** sat/vio epoch, a set of time points*/
+    vector<double> epoch;
 
 	/// CONSTRUCTORS
 
@@ -124,6 +128,13 @@ public:
 
     /** set diagnose */
     void set_diagnose(double);
+
+    /** set sat/vio epoch*/
+    //in this method, it checks if should reset, and call reset_monitor if yes.
+    void set_epoch(const vector<double> &epo);
+
+    /** reset monitor*/
+    void reset_monitor(double);
 
 	/** Create a new trace_tests structure and add it to the queue */
 	void add_trace_test(const string &test_id, const string &trace_cfg, double sim_time, bool visu);

@@ -34,8 +34,12 @@ namespace CPSGrader {
 
         // z is neutral semantics, z_up upper bound, z_low lower bound
         Signal z, z_up, z_low;
+        
+        // if the formula is selected as the sub-formula
+        bool selected;
+        string selected_str;
 
-        transducer(): start_time(0.), end_time(0.) {};
+        transducer(): start_time(0.), end_time(0.), selected(false), selected_str("") {};
         
         virtual transducer * clone() const =0;
 
@@ -54,6 +58,22 @@ namespace CPSGrader {
         // TODO should be done at the constructor, parser and cloning level...
         virtual void set_trace_data_ptr(const trace_data &trace) {
             trace_data_ptr= &trace;
+        }
+
+        //set selected sub-formula
+        //L: left child R: right child M: child
+        virtual void set_selected_subformula(const string &sf){}
+
+        //collect vio/sat epoch
+        virtual void collect_vio_epoch(vector<double>& vset, double t){}
+        virtual void collect_sat_epoch(vector<double>& sset, double t){}
+
+        double get_zup(double t){
+            return z_up.get_value(t);
+        }
+
+        double get_zlow(double t){
+            return z_low.get_value(t);
         }
 
         // compute quantitative semantics for current data
@@ -101,6 +121,24 @@ namespace CPSGrader {
             child->set_trace_data_ptr(trace);
         }
 
+        virtual void set_selected_subformula(const string &sf){
+            selected_str = sf;
+            if(sf.size() == 1){
+                if (sf.front() == 'M'){
+                    child->selected = true;
+                }else{
+                    cout<<"The sub_formula is set wrongly!"<<endl;
+                }
+            }else{
+                string suf = sf.substr(1);
+                if(sf.front() == 'M'){
+                    child->set_selected_subformula(suf);
+                }else{
+                    cout<<"The sub_formula is set wrongly!"<<endl;
+                }
+            }
+        }
+
         // update quantitative semantics based on new data
         virtual double update_robustness();
         virtual double update_lower_rob(){return 0.;};
@@ -138,6 +176,28 @@ namespace CPSGrader {
             trace_data_ptr= &trace;
             childL->set_trace_data_ptr(trace);
             childR->set_trace_data_ptr(trace);
+        }
+
+        virtual void set_selected_subformula(const string &sf){
+            selected_str = sf;
+            if(sf.size()==1){
+                if(sf.front() == 'L'){
+                    childL->selected = true;
+                }else if(sf.front() == 'R'){
+                    childR->selected = true;
+                }else{
+                    cout<<"The sub_formula is set wrongly!"<<endl;
+                }
+            }else{
+                string suf = sf.substr(1);
+                if(sf.front() == 'L'){
+                    childL->set_selected_subformula(suf);
+                }else if(sf.front() == 'R'){
+                    childR->set_selected_subformula(suf);
+                }else{
+                    cout<<"The sub_formula is set wrongly!"<<endl;
+                }
+            }
         }
 
         virtual ~binary_transducer() {
@@ -238,6 +298,9 @@ namespace CPSGrader {
 
         double compute_upper_rob();
 
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
+
         void print() const{
             print(cout);
         };
@@ -272,6 +335,9 @@ namespace CPSGrader {
         double compute_lower_rob();
 
         double compute_upper_rob();
+
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
 
 
         void print() const{
@@ -310,6 +376,9 @@ namespace CPSGrader {
         double compute_lower_rob();
 
         double compute_upper_rob();
+
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
 
         void print() const{
             print(cout);
@@ -383,6 +452,9 @@ namespace CPSGrader {
         double compute_lower_rob();
         double compute_upper_rob();
 
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
+
 
         void print() const{
             print(cout);
@@ -418,6 +490,9 @@ namespace CPSGrader {
         double compute_robustness();
         double compute_lower_rob();
         double compute_upper_rob();
+    
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
 
         void print() const{
             print(cout);
@@ -512,6 +587,9 @@ namespace CPSGrader {
         };
 
         double compute_robustness();
+
+        void collect_vio_epoch(vector<double>& vset, double t);
+        void collect_sat_epoch(vector<double>& sset, double t);
 
         virtual void print(ostream &os) const {
             childL->print(os);
