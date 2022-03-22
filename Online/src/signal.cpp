@@ -210,11 +210,21 @@ namespace CPSGrader {
         }
     }
 
-    double Signal::get_value(double t){
-        double v = 0;
+    double Signal::get_value(double t, int dir = 0){
+        double v;
+        if(dir == 1){
+            v = TOP;
+        }else if(dir == -1){
+            v = BOTTOM;
+        }else{
+            v = 0;
+        }
+
         Signal::const_iterator k;
         for(Signal::const_iterator i = begin(); i != end(); i ++){
-            if ((*i).time > t){
+            if((*i).time == t){
+                v = (*i).value;
+            }else if((*i).time > t){
                 v = (*k).value;
             }else{
                 k = i;

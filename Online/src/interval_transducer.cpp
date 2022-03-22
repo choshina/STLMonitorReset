@@ -414,15 +414,25 @@ namespace CPSGrader {
     }
 
     void alw_transducer::collect_vio_epoch(vector<double>& vset, double t){
+        
         double a,b;
         if (!get_param(I->begin_str,a)) a = I->begin;
         if (!get_param(I->end_str,b)) b = I->end;
 
+        //cout<<"zup(t): " << get_zup(t) << "front:" << z_up.front() << endl;
         if(get_zup(t) < 0){
             if(selected){
                 vset.push_back(t);
             }else{
+                
                 for(double tp = t+ a; tp <= t + b; tp ++){
+                    if(trace_data_ptr->back().front() == 14 && tp == 11){
+                        cout<<"tp "<< tp<<endl; 
+                        cout<<"ab: " <<a <<"   "<<b <<endl;
+                        cout<< "childzup(tp): "<< child->get_zup(tp)<<" " <<endl;
+                        cout<< "childzup: "<< child->z_up<<endl;
+                    }
+
                     if(child->get_zup(tp) < 0){
                         child->collect_vio_epoch(vset, tp);
                     }

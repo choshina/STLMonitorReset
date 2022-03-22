@@ -69,11 +69,11 @@ namespace CPSGrader {
         virtual void collect_sat_epoch(vector<double>& sset, double t){}
 
         double get_zup(double t){
-            return z_up.get_value(t);
+            return z_up.get_value(t, 1);
         }
 
         double get_zlow(double t){
-            return z_low.get_value(t);
+            return z_low.get_value(t, -1);
         }
 
         // compute quantitative semantics for current data

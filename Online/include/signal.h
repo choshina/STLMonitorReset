@@ -89,7 +89,7 @@ public:
     void addLastSample(); // add a sample at endTime. 
 	void removeInf();
 
-    double get_value(double);
+    double get_value(double, int);
 
 
 	// write signal to file

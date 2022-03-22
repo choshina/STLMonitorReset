@@ -26,11 +26,11 @@
 
 #define NPARAMS 6
 
-#define NOUTPORT 4
+#define NOUTPORT 2
 #define UP_IDX 0
 #define LOW_IDX 1
-#define VIO_IDX 2
-#define SAT_IDX 3
+//#define VIO_IDX 2
+//#define SAT_IDX 3
 
 
 #if !defined(MATLAB_MEX_FILE)
@@ -236,8 +236,8 @@ static void mdlInitializeConditions(SimStruct *S)
 
     x0[UP_IDX]  =  max_rob;
     x0[LOW_IDX] = -max_rob;
-    x0[VIO_IDX] = 0;
-    x0[SAT_IDX] = 0;
+    //x0[VIO_IDX] = 0;
+    //x0[SAT_IDX] = 0;
 }
 
 
@@ -334,12 +334,13 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
 
         if(stl_driver->diagnose != 0){
             if(rob_up<0){
-                phi->collect_vio_epoch(vio_set, 0);
+                phi->collect_vio_epoch(vio_set, phi->start_time);
                 vio_epoch = vio_set.size();
+               // cout<<vio_epoch<<endl;
                 stl_driver->set_epoch(vio_set); //reset done if needed
 
             }else if(rob_low > 0){
-                phi->collect_sat_epoch(sat_set, 0);
+                phi->collect_sat_epoch(sat_set, phi->start_time);
                 sat_epoch = sat_set.size();
                 stl_driver->set_epoch(sat_set); //reset done if needed
             }
@@ -357,8 +358,8 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     
     xd[UP_IDX] =  rob_up;
     xd[LOW_IDX] = rob_low;
-    xd[VIO_IDX] = vio_epoch;
-    xd[SAT_IDX] = sat_epoch;
+    //xd[VIO_IDX] = vio_epoch;
+    //xd[SAT_IDX] = sat_epoch;
 }
 
 
@@ -374,8 +375,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
        
     y[UP_IDX] =  xd[UP_IDX];
     y[LOW_IDX] = xd[LOW_IDX];
-    y[VIO_IDX] = xd[VIO_IDX];
-    y[SAT_IDX] = xd[SAT_IDX];
+    //y[VIO_IDX] = xd[VIO_IDX];
+    //y[SAT_IDX] = xd[SAT_IDX];
     
 }
 
