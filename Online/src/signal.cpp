@@ -222,10 +222,12 @@ namespace CPSGrader {
 
         Signal::const_iterator k;
         for(Signal::const_iterator i = begin(); i != end(); i ++){
-            if((*i).time == t){
+            if((*i).time == t ){
                 v = (*i).value;
-            }else if((*i).time > t){
+                break;
+            }else if((*i).time > t ){
                 v = (*k).value;
+                break;
             }else{
                 k = i;
             }

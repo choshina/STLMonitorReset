@@ -285,6 +285,8 @@ static void mdlStart(SimStruct *S)
     stl_driver->set_diagnose(diag);
 
     //cout<<string(sf_buf)<<endl;
+    //cout<<diag<<endl;
+    //cout<<string(sf_buf)<<endl;
 
     mxFree(sf_buf);
 
@@ -336,7 +338,6 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             if(rob_up<0){
                 phi->collect_vio_epoch(vio_set, phi->start_time);
                 vio_epoch = vio_set.size();
-               // cout<<vio_epoch<<endl;
                 stl_driver->set_epoch(vio_set); //reset done if needed
 
             }else if(rob_low > 0){
@@ -345,6 +346,13 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
                 stl_driver->set_epoch(sat_set); //reset done if needed
             }
         }
+
+       if(stl_driver->data.back().front() == 12||stl_driver->data.back().front() == 14){
+//             for(auto j = vio_set.begin(); j!= vio_set.end(); j++){
+//                 cout<<(*j)<<endl;
+//             }
+           //stl_driver->print_trace();
+       }
 
         //TODO: print the epoch at the last moment.
 

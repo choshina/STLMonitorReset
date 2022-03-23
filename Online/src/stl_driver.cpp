@@ -393,6 +393,7 @@ void STLDriver::set_diagnose(double d){
 void STLDriver::set_epoch(const vector<double> &epo){
     int old_size = epoch.size();
     int new_size = epo.size();
+    cout<<"old: "<<old_size<<"new: "<<new_size <<endl;
 
     epoch = epo;
 
@@ -407,7 +408,7 @@ void STLDriver::reset_monitor(double where){
     //shift data
     vector<vector<double>> new_data;
     for(auto ii = data.begin(); ii!= data.end(); ii++){
-        if((*ii).front() >= where){
+        if((*ii).front() > where){
             vector<double> pp;
             pp.push_back((*ii).front() - where);
             for(auto jj = (*ii).begin() + 1; jj!= (*ii).end(); jj ++){

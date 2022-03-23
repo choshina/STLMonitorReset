@@ -302,36 +302,25 @@ namespace CPSGrader {
     }
 
     void ev_transducer::collect_vio_epoch(vector<double>& vset, double t){
-        double a,b;
-        if (!get_param(I->begin_str,a)) a = I->begin;
-        if (!get_param(I->end_str,b)) b = I->end;
 
         if(get_zup(t) < 0){
             if(selected){
                 vset.push_back(t);
             }else{
-                for(double tp = t+ a; tp <= t + b; tp ++){
-                    if(child->get_zup(tp) < 0){
-                        child->collect_vio_epoch(vset, tp);
-                    }
+                for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+                    child->collect_vio_epoch(vset, (*i).time);
                 }
             }
         }
     }
 
     void ev_transducer::collect_sat_epoch(vector<double>& sset, double t){
-        double a,b;
-        if (!get_param(I->begin_str,a)) a = I->begin;
-        if (!get_param(I->end_str,b)) b = I->end;
-
         if(get_zlow(t) > 0){
             if(selected){
                 sset.push_back(t);
             }else{
-                for(double tp = t+ a; tp <= t + b; tp ++){
-                    if(child->get_zlow(tp) > 0){
-                        child->collect_sat_epoch(sset, tp);
-                    }
+                for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+                    child->collect_sat_epoch(sset, (*i).time);
                 }
             }
         }
@@ -414,10 +403,6 @@ namespace CPSGrader {
     }
 
     void alw_transducer::collect_vio_epoch(vector<double>& vset, double t){
-        
-        double a,b;
-        if (!get_param(I->begin_str,a)) a = I->begin;
-        if (!get_param(I->end_str,b)) b = I->end;
 
         //cout<<"zup(t): " << get_zup(t) << "front:" << z_up.front() << endl;
         if(get_zup(t) < 0){
@@ -425,35 +410,33 @@ namespace CPSGrader {
                 vset.push_back(t);
             }else{
                 
-                for(double tp = t+ a; tp <= t + b; tp ++){
-                    if(trace_data_ptr->back().front() == 14 && tp == 11){
-                        cout<<"tp "<< tp<<endl; 
-                        cout<<"ab: " <<a <<"   "<<b <<endl;
-                        cout<< "childzup(tp): "<< child->get_zup(tp)<<" " <<endl;
-                        cout<< "childzup: "<< child->z_up<<endl;
-                    }
-
-                    if(child->get_zup(tp) < 0){
-                        child->collect_vio_epoch(vset, tp);
-                    }
+//                 for(double tp = t+ a; tp <= t + b; tp ++){
+//                     if(trace_data_ptr->back().front() == 14 && tp == 11){
+//                         cout<<"tp "<< tp<<endl; 
+//                         cout<<"ab: " <<a <<"   "<<b <<endl;
+//                         cout<< "childzup(tp): "<< child->get_zup(tp)<<" " <<endl;
+//                         cout<< "childzup: "<< child->z_up<<endl;
+//                     }
+// 
+//                     if(child->get_zup(tp) < 0){
+//                         child->collect_vio_epoch(vset, tp);
+//                     }
+//                 }
+                for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+                    child->collect_vio_epoch(vset, (*i).time);
                 }
             }
         }
     }
 
     void alw_transducer::collect_sat_epoch(vector<double>& sset, double t){
-        double a,b;
-        if (!get_param(I->begin_str,a)) a = I->begin;
-        if (!get_param(I->end_str,b)) b = I->end;
 
         if(get_zlow(t) > 0){
             if(selected){
                 sset.push_back(t);
             }else{
-                for(double tp = t+ a; tp <= t + b; tp ++){
-                    if(child->get_zlow(tp) > 0){
-                        child->collect_sat_epoch(sset, tp);
-                    }
+                for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+                    child->collect_sat_epoch(sset, (*i).time);
                 }
             }
         }
