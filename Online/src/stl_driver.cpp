@@ -28,8 +28,8 @@ STLDriver::STLDriver()
   nb_test_total(0),
   nb_test_pos(0),
   error_flag(false),
-  sub_form(""),
-  diagnose(0)
+  diagnose(0),
+  sum_shift(0)
 {
 }
 
@@ -41,8 +41,8 @@ STLDriver::STLDriver(trace_data _trace)
   nb_test_total(0),
   nb_test_pos(0),
   error_flag(false),
-  sub_form(""),
-  diagnose(0)
+  diagnose(0),
+  sum_shift(0)
 {
 	data = _trace;
 };
@@ -410,6 +410,8 @@ bool STLDriver::set_epoch(const vector<double> &epo){
 void STLDriver::reset_monitor(double v_shift){
     //shift data
     double shift = v_shift + 0.1; //mitigate the numerical error
+    sum_shift = sum_shift + shift;
+    
     vector<vector<double>> new_data;
     for(auto ii = data.begin(); ii!= data.end(); ii++){
         if((*ii).front() >= shift - 0.02){ //mitigate the numerical error

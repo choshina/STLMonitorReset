@@ -104,7 +104,7 @@ public:
 	bool error_flag;
 
     /** the selected sub-formula */
-    string sub_form;
+    //string sub_form;
 
     /** the switch of diagnoser */
     //0: no epoch collection 1: collect epoch but no reset 2: collect and reset
@@ -112,6 +112,9 @@ public:
 
     /** sat/vio epoch, a set of time points*/
     vector<double> epoch;
+
+    /** cumulated shift*/
+    double sum_shift;
 
 	/// CONSTRUCTORS
 

@@ -309,13 +309,15 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
 
 
     //make data precise to handle numerical error
-    double rT_ = (double)T;
-    double rT = (int)(rT_*10 + 0.5); //refresh rate = 0.1
-    double rTT = (double)rT/10;
+    double rT = (double)T;
+    rT = (int)(rT*10 + 0.5); //refresh rate = 0.1
+    rT = (double)rT/10;
+    rT = rT - stl_driver->sum_shift; // calibrate the time stamp
+
 
     vector<double> points;
     //points.push_back(T);
-    points.push_back(rTT);
+    points.push_back(rT);
     for(int_T i = 0; i< u_width; ++i ) {
         points.push_back(*u[i]);
     }
@@ -365,14 +367,14 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             }
         }
 
-       //if(stl_driver->data.back().front() == 12.7){
+       //if(stl_driver->data.back().front() == 16){
 //         cout<<flag<<endl;
 //         if(flag == 1){
 // //             for(auto j = vio_set.begin(); j!= vio_set.end(); j++){
 // //                 cout<<(*j)<<endl;
 // //             }
-//             stl_driver->print_trace();
-//         }
+        //     stl_driver->print_trace();
+         //}
 
         //TODO: print the epoch at the last moment.
 
