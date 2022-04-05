@@ -124,14 +124,14 @@ public:
 	~STLDriver() {};
 
     /** set sub_form */
-    void set_sub_form(const string &sf);
+    //void set_sub_form(const string &sf);
 
     /** set diagnose */
     void set_diagnose(double);
 
     /** set sat/vio epoch*/
-    //in this method, it checks if should reset, and call reset_monitor if yes.
-    void set_epoch(const vector<double> &epo);
+    //return if should reset. Yes if diagnose == 2 and epoch size changes
+    bool set_epoch(const vector<double> &epo);
 
     /** reset monitor*/
     void reset_monitor(double);

@@ -382,35 +382,39 @@ bool STLDriver::dump_test_log_file(const string & filename){
 
 }
   
-void STLDriver::set_sub_form(const string &sf){
-    sub_form = sf;
-}
+// void STLDriver::set_sub_form(const string &sf){
+//     sub_form = sf;
+// }
 
 void STLDriver::set_diagnose(double d){
     diagnose = d;
 }
 
-void STLDriver::set_epoch(const vector<double> &epo){
+bool STLDriver::set_epoch(const vector<double> &epo){
     int old_size = epoch.size();
     int new_size = epo.size();
     cout<<"old: "<<old_size<<"new: "<<new_size <<endl;
 
     epoch = epo;
 
-    if(new_size == old_size && diagnose == 2){ //reset
-        double reset_loc = epo.back();
-        reset_monitor(reset_loc);
-        cout<<"RESET NOW!!";
-    }
+    bool should_reset = (new_size == old_size && diagnose == 2);
+    return should_reset;
+
+//     if(new_size == old_size && diagnose == 2){ //reset
+//         double reset_loc = epo.back();
+//         reset_monitor(reset_loc);
+//         cout<<"RESET NOW!!";
+//     }
 }
 
-void STLDriver::reset_monitor(double where){
+void STLDriver::reset_monitor(double v_shift){
     //shift data
+    double shift = v_shift + 0.1; //mitigate the numerical error
     vector<vector<double>> new_data;
     for(auto ii = data.begin(); ii!= data.end(); ii++){
-        if((*ii).front() > where){
+        if((*ii).front() >= shift - 0.02){ //mitigate the numerical error
             vector<double> pp;
-            pp.push_back((*ii).front() - where);
+            pp.push_back((*ii).front() - shift);
             for(auto jj = (*ii).begin() + 1; jj!= (*ii).end(); jj ++){
                 pp.push_back(*jj);
             }
@@ -418,6 +422,7 @@ void STLDriver::reset_monitor(double where){
         }
     }
     data = new_data;
+    epoch.clear();
 }
 
 } // namespace CPSGrader

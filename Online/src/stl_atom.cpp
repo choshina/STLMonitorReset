@@ -65,6 +65,15 @@ namespace CPSGrader {
             sset.push_back(t);
         }
     }
+
+    double stl_atom::min_shift_vio(double t){
+        return t - start_time;
+    }
+
+    double stl_atom::min_shift_sat(double t){
+        return t - start_time;
+    }
+
     
     double signal_transducer::compute_robustness() {
 #ifdef DEBUG__

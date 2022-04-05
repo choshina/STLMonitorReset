@@ -81,40 +81,51 @@ namespace CPSGrader {
 
     void and_transducer::collect_vio_epoch(vector<double>& vset, double t){
         if (get_zup(t) < 0){
-            if(selected){
-                vset.push_back(t);
-            }else{
-                if(selected_str.front() == 'L'){
-                    if(childL->get_zup(t) < 0){
-                        childL->collect_vio_epoch(vset, t);
-                    }
-                }else{
-                    if(childR->get_zup(t) < 0){
-                        childR->collect_vio_epoch(vset, t);
-                    }
-                }
+            if(childL->get_zup(t) < 0){
+                childL->collect_vio_epoch(vset, t);
+            }
+
+            if(childR->get_zup(t) < 0){
+                childR->collect_vio_epoch(vset, t);
             }
         }
     }
 
     void and_transducer::collect_sat_epoch(vector<double>& sset, double t){
         if (get_zlow(t) > 0){
-            if(selected){
-                sset.push_back(t);
-            }else{
-                if(selected_str.front() == 'L'){
-                    if(childL->get_zlow(t) > 0){
-                        childL->collect_sat_epoch(sset, t);
-                    }
-                }else{
-                    if(childR->get_zlow(t) > 0){
-                        childR->collect_sat_epoch(sset, t);
-                    }
-                }
+            if(childL->get_zlow(t) > 0){
+                childL->collect_sat_epoch(sset, t);
+            }
+
+            if(childR->get_zlow(t) > 0){
+                childR->collect_sat_epoch(sset, t);
             }
         }
     }
 
+    double and_transducer::min_shift_vio(double t){
+        double a = - Signal::BigM;
+        double b = - Signal::BigM;
+        if (childL->get_zup(t)<0 ){
+            a = childL->min_shift_vio(t);
+        }
+        if (childR->get_zup(t)<0){
+            b = childR->min_shift_vio(t);
+        }
+        return a>b?a:b;
+    }
+
+    double and_transducer::min_shift_sat(double t){
+        double a = Signal::BigM;
+        double b = Signal::BigM;
+        if (childL->get_zlow(t)>0){
+            a = childL->min_shift_sat(t);
+        }
+        if(childR->get_zlow(t)>0){
+            b = childR->min_shift_sat(t);
+        }
+        return a<b?a:b;
+    }
     
     double or_transducer::compute_lower_rob(){
         childL->compute_lower_rob();
@@ -139,38 +150,51 @@ namespace CPSGrader {
 
     void or_transducer::collect_vio_epoch(vector<double>& vset, double t){
         if (get_zup(t) < 0){
-            if(selected){
-                vset.push_back(t);
-            }else{
-                if(selected_str.front() == 'L'){
-                    if(childL->get_zup(t) < 0){
-                        childL->collect_vio_epoch(vset, t);
-                    }
-                }else{
-                    if(childR->get_zup(t) < 0){
-                        childR->collect_vio_epoch(vset, t);
-                    }
-                }
+            if(childL->get_zup(t) < 0){
+                childL->collect_vio_epoch(vset, t);
             }
+
+            if(childR->get_zup(t) < 0){
+                childR->collect_vio_epoch(vset, t);
+            }
+
         }
     }
 
     void or_transducer::collect_sat_epoch(vector<double>& sset, double t){
         if (get_zlow(t) > 0){
-            if(selected){
-                sset.push_back(t);
-            }else{
-                if(selected_str.front() == 'L'){
-                    if(childL->get_zlow(t) > 0){
-                        childL->collect_sat_epoch(sset, t);
-                    }
-                }else{
-                    if(childR->get_zlow(t) > 0){
-                        childR->collect_sat_epoch(sset, t);
-                    }
-                }
+            if(childL->get_zlow(t) > 0){
+                childL->collect_sat_epoch(sset, t);
+            }
+
+            if(childR->get_zlow(t) > 0){
+                childR->collect_sat_epoch(sset, t);
             }
         }
+    }
+
+    double or_transducer::min_shift_vio(double t){
+        double a = Signal::BigM;
+        double b = Signal::BigM;
+        if (childL->get_zup(t)<0 ){
+            a = childL->min_shift_vio(t);
+        }
+        if (childR->get_zup(t)<0){
+            b = childR->min_shift_vio(t);
+        }
+        return a<b?a:b;
+    }
+
+    double or_transducer::min_shift_sat(double t){
+        double a = - Signal::BigM;
+        double b = - Signal::BigM;
+        if (childL->get_zlow(t)>0){
+            a = childL->min_shift_sat(t);
+        }
+        if(childR->get_zlow(t)>0){
+            b = childR->min_shift_sat(t);
+        }
+        return a>b?a:b;
     }
 
 // IMPLIES transducer
@@ -229,6 +253,14 @@ namespace CPSGrader {
 
     void not_transducer::collect_sat_epoch(vector<double>& sset, double t){
         child->collect_vio_epoch(sset, t);
+    }
+
+    double not_transducer::min_shift_vio(double t){
+        return child->min_shift_sat(t);
+    }
+
+    double not_transducer::min_shift_sat(double t){
+        return child->min_shift_vio(t);
     }
 
     // EVENTUALLY
@@ -302,12 +334,9 @@ namespace CPSGrader {
     }
 
     void ev_transducer::collect_vio_epoch(vector<double>& vset, double t){
-
         if(get_zup(t) < 0){
-            if(selected){
-                vset.push_back(t);
-            }else{
-                for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+            for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+                if(child->get_zup((*i).time) < 0){
                     child->collect_vio_epoch(vset, (*i).time);
                 }
             }
@@ -316,14 +345,39 @@ namespace CPSGrader {
 
     void ev_transducer::collect_sat_epoch(vector<double>& sset, double t){
         if(get_zlow(t) > 0){
-            if(selected){
-                sset.push_back(t);
-            }else{
-                for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+            for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+                if(child->get_zlow((*i).time) > 0){
                     child->collect_sat_epoch(sset, (*i).time);
                 }
             }
+
         }
+    }
+
+    double ev_transducer::min_shift_vio(double t){
+        double a = Signal::BigM;
+        for(auto i = child->z_up.begin(); i!=child->z_up.end(); i ++){
+            if(child->get_zup((*i).time) < 0){
+                double b = child->min_shift_vio((*i).time);
+                if(b<a){
+                    a = b;
+                }
+            }
+        }
+        return a;
+    }
+
+    double ev_transducer::min_shift_sat(double t){
+        double a = - Signal::BigM;
+        for(auto i = child->z_low.begin();i!=child->z_low.end();i ++){
+            if(child->get_zlow((*i).time)>0){
+                double b = child->min_shift_sat((*i).time);
+                if(b>a){
+                    a = b;
+                }
+            }
+        }
+        return a;
     }
 
     // ALWAYS
@@ -405,11 +459,7 @@ namespace CPSGrader {
     void alw_transducer::collect_vio_epoch(vector<double>& vset, double t){
 
         //cout<<"zup(t): " << get_zup(t) << "front:" << z_up.front() << endl;
-        if(get_zup(t) < 0){
-            if(selected){
-                vset.push_back(t);
-            }else{
-                
+        if(get_zup(t) < 0){               
 //                 for(double tp = t+ a; tp <= t + b; tp ++){
 //                     if(trace_data_ptr->back().front() == 14 && tp == 11){
 //                         cout<<"tp "<< tp<<endl; 
@@ -422,7 +472,8 @@ namespace CPSGrader {
 //                         child->collect_vio_epoch(vset, tp);
 //                     }
 //                 }
-                for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+            for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+                if(child->get_zup((*i).time)<0){
                     child->collect_vio_epoch(vset, (*i).time);
                 }
             }
@@ -430,16 +481,39 @@ namespace CPSGrader {
     }
 
     void alw_transducer::collect_sat_epoch(vector<double>& sset, double t){
-
         if(get_zlow(t) > 0){
-            if(selected){
-                sset.push_back(t);
-            }else{
-                for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+            for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+                if(child->get_zlow((*i).time) > 0){
                     child->collect_sat_epoch(sset, (*i).time);
                 }
             }
         }
+    }
+
+    double alw_transducer::min_shift_vio(double t){
+        double a = - Signal::BigM;
+        for(auto i = child->z_up.begin(); i!=child->z_up.end(); i ++){
+            if(child->get_zup((*i).time) < 0){
+                double b = child->min_shift_vio((*i).time);
+                if(b>a){
+                    a = b;
+                }
+            }
+        }
+        return a;
+    }
+
+    double alw_transducer::min_shift_sat(double t){
+        double a = Signal::BigM;
+        for(auto i = child->z_low.begin();i!=child->z_low.end();i ++){
+            if(child->get_zlow((*i).time)>0){
+                double b = child->min_shift_sat((*i).time);
+                if(b<a){
+                    a = b;
+                }
+            }
+        }
+        return a;
     }
 
     // TODO the following is a super conservative implementation - (how) can we do better ?

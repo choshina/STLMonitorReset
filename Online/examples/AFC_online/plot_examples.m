@@ -1,12 +1,11 @@
 % Run Init_AFC_online first
 %phi_AFC = 'alw_[10, 30] ( ( (abs(AF[t]-AFref[t]) > 0.1)) => (ev_[0, 5] (abs(AF[t]-AFref[t]) < 0.1)))';
-phi_AFC = 'alw_[10, 30](AF[t]< 14.71)';
+phi_AFC = 'alw_[10, 40](AF[t]< 14.71)';
 %phi_AFC = 'alw_[0,30](alw_[0,5](AF[t]<14.8))';
-subform = 'M';
-diagnoser = 0;
+%diagnoser = 2;
 
 BrAFC.ResetSimulations();
-BrAFC.SetParam({'max_rob','Pedal_Angle_pulse_period', 'Pedal_Angle_pulse_amp'}, [.5, 12, 50]);
+BrAFC.SetParam({'max_rob','Pedal_Angle_pulse_period', 'Pedal_Angle_pulse_amp', 'diagnoser'}, [.5, 12, 50, 2]);
 BrAFC.Sim(0:.1:40) 
 
 Trace = BrAFC.GetTraces();
@@ -18,7 +17,7 @@ close
 figure;
 subplot(3,1,1)
 
-plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'LineWidth', 4);
+plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'LineWidth', 2);
 set(gca, 'LineWidth', 2, 'FontSize',18)
 
 legend({'AF','AFref'});

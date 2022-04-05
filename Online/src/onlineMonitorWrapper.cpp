@@ -14,17 +14,17 @@
 #define STL_IDX 1
 #define MAX_ROB_IDX 2
 #define REFRESH_IDX 3
-#define SUBFORM_IDX 4
-#define DIAGNOSE_IDX 5
+//#define SUBFORM_IDX 4
+#define DIAGNOSE_IDX 4
 
 #define SIGNAL_STRING(S) ssGetSFcnParam(S,SIG_IDX)
 #define STL_STRING(S)    ssGetSFcnParam(S,STL_IDX)
 #define MAX_ROB(S)       ssGetSFcnParam(S,MAX_ROB_IDX)
 #define REFRESH_RATE(S)  ssGetSFcnParam(S,REFRESH_IDX)
-#define SUBFORM(S)       ssGetSFcnParam(S,SUBFORM_IDX)
+//#define SUBFORM(S)       ssGetSFcnParam(S,SUBFORM_IDX)
 #define DIAGNOSE(S)      ssGetSFcnParam(S,DIAGNOSE_IDX)
 
-#define NPARAMS 6
+#define NPARAMS 5
 
 #define NOUTPORT 2
 #define UP_IDX 0
@@ -105,16 +105,16 @@ static void mdlCheckParameters(SimStruct *S)
         return;
         }
 
-        if (mxIsEmpty(    ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            mxIsSparse(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            mxIsComplex(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            mxIsLogical(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            mxIsNumeric(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            mxIsDouble(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
-            !mxIsChar( ssGetSFcnParam(S,SUBFORM_IDX))) {
-        ssSetErrorStatus(S,"Parameter sub-form must be a string.");
-        return;
-        }
+//         if (mxIsEmpty(    ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             mxIsSparse(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             mxIsComplex(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             mxIsLogical(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             mxIsNumeric(  ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             mxIsDouble(   ssGetSFcnParam(S,SUBFORM_IDX)) ||
+//             !mxIsChar( ssGetSFcnParam(S,SUBFORM_IDX))) {
+//         ssSetErrorStatus(S,"Parameter sub-form must be a string.");
+//         return;
+//         }
 
         if (mxIsEmpty(    ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
             mxIsSparse(   ssGetSFcnParam(S,DIAGNOSE_IDX)) ||
@@ -168,7 +168,7 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetSFcnParamTunable(S,SIG_IDX,true);
     ssSetSFcnParamTunable(S,MAX_ROB_IDX,true);
     ssSetSFcnParamTunable(S,REFRESH_IDX,true);
-    ssSetSFcnParamTunable(S,SUBFORM_IDX,true);
+    //ssSetSFcnParamTunable(S,SUBFORM_IDX,true);
     ssSetSFcnParamTunable(S,DIAGNOSE_IDX,true);
 
     // Specify I/O
@@ -268,7 +268,7 @@ static void mdlStart(SimStruct *S)
     char *signal_buf = mxArrayToString(SIGNAL_STRING(S));
     char *stl_buf = mxArrayToString(STL_STRING(S));   
 
-    char *sf_buf = mxArrayToString(SUBFORM(S));
+    //char *sf_buf = mxArrayToString(SUBFORM(S));
     real_T diag = mxGetScalar(DIAGNOSE(S));
 
     string phi_st = "signal "+ string(signal_buf) + "\n" + "phi:=" + string(stl_buf);
@@ -281,14 +281,14 @@ static void mdlStart(SimStruct *S)
     
     stl_driver->parse_string(phi_st);
 
-    stl_driver->set_sub_form(string(sf_buf));
+    //stl_driver->set_sub_form(string(sf_buf));
     stl_driver->set_diagnose(diag);
 
     //cout<<string(sf_buf)<<endl;
     //cout<<diag<<endl;
     //cout<<string(sf_buf)<<endl;
 
-    mxFree(sf_buf);
+    //mxFree(sf_buf);
 
     ssGetPWork(S)[0] = stl_driver;
 
@@ -308,8 +308,14 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     real_T             T        =  ssGetT(S);
 
 
+    //make data precise to handle numerical error
+    double rT_ = (double)T;
+    double rT = (int)(rT_*10 + 0.5); //refresh rate = 0.1
+    double rTT = (double)rT/10;
+
     vector<double> points;
-    points.push_back(T);
+    //points.push_back(T);
+    points.push_back(rTT);
     for(int_T i = 0; i< u_width; ++i ) {
         points.push_back(*u[i]);
     }
@@ -326,7 +332,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     if (stl_driver->data.size()>2) {
         transducer *phi = stl_driver->formula_map["phi"]->clone();
         phi->set_trace_data_ptr(stl_driver->data);
-        phi->set_selected_subformula(stl_driver->sub_form);
+        //phi->set_selected_subformula(stl_driver->sub_form);
         
         rob_up  = phi->compute_upper_rob();
         rob_low = phi->compute_lower_rob();
@@ -337,22 +343,36 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         if(stl_driver->diagnose != 0){
             if(rob_up<0){
                 phi->collect_vio_epoch(vio_set, phi->start_time);
-                vio_epoch = vio_set.size();
-                stl_driver->set_epoch(vio_set); //reset done if needed
+                if (stl_driver->set_epoch(vio_set)){
+                    cout<<"Reset Now~~"<<endl;
+                    //cout<<"tau: "<< stl_driver->data.back().front()<<endl;
+//                     if(stl_driver->data.back().front() > 12.68 && stl_driver->data.back().front() < 12.72){
+//                         flag = 1;
+//                     }
+                    double delta = phi->min_shift_vio(phi->start_time);
+                    cout<<"delta: " << delta<<endl;
+                    stl_driver->reset_monitor(delta);
+                }
 
             }else if(rob_low > 0){
                 phi->collect_sat_epoch(sat_set, phi->start_time);
-                sat_epoch = sat_set.size();
-                stl_driver->set_epoch(sat_set); //reset done if needed
+                stl_driver->set_epoch(sat_set);
+                if (stl_driver->set_epoch(vio_set)){
+                    cout<<"Reset Now~~"<<endl;
+                    double delta = phi->min_shift_vio(phi->start_time);
+                    stl_driver->reset_monitor(delta);
+                }
             }
         }
 
-       if(stl_driver->data.back().front() == 12||stl_driver->data.back().front() == 14){
-//             for(auto j = vio_set.begin(); j!= vio_set.end(); j++){
-//                 cout<<(*j)<<endl;
-//             }
-           //stl_driver->print_trace();
-       }
+       //if(stl_driver->data.back().front() == 12.7){
+//         cout<<flag<<endl;
+//         if(flag == 1){
+// //             for(auto j = vio_set.begin(); j!= vio_set.end(); j++){
+// //                 cout<<(*j)<<endl;
+// //             }
+//             stl_driver->print_trace();
+//         }
 
         //TODO: print the epoch at the last moment.
 

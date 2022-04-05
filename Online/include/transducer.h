@@ -36,10 +36,10 @@ namespace CPSGrader {
         Signal z, z_up, z_low;
         
         // if the formula is selected as the sub-formula
-        bool selected;
-        string selected_str;
+        //bool selected;
+        //string selected_str;
 
-        transducer(): start_time(0.), end_time(0.), selected(false), selected_str("") {};
+        transducer(): start_time(0.), end_time(0.) {};
         
         virtual transducer * clone() const =0;
 
@@ -62,11 +62,15 @@ namespace CPSGrader {
 
         //set selected sub-formula
         //L: left child R: right child M: child
-        virtual void set_selected_subformula(const string &sf){}
+        //virtual void set_selected_subformula(const string &sf){}
 
         //collect vio/sat epoch
         virtual void collect_vio_epoch(vector<double>& vset, double t){}
         virtual void collect_sat_epoch(vector<double>& sset, double t){}
+
+        //decide delta
+        virtual double min_shift_vio(double t){return 0;}
+        virtual double min_shift_sat(double t){return 0;}
 
         double get_zup(double t){
             return z_up.get_value(t, 1);
@@ -121,23 +125,23 @@ namespace CPSGrader {
             child->set_trace_data_ptr(trace);
         }
 
-        virtual void set_selected_subformula(const string &sf){
-            selected_str = sf;
-            if(sf.size() == 1){
-                if (sf.front() == 'M'){
-                    child->selected = true;
-                }else{
-                    cout<<"The sub_formula is set wrongly!"<<endl;
-                }
-            }else{
-                string suf = sf.substr(1);
-                if(sf.front() == 'M'){
-                    child->set_selected_subformula(suf);
-                }else{
-                    cout<<"The sub_formula is set wrongly!"<<endl;
-                }
-            }
-        }
+//         virtual void set_selected_subformula(const string &sf){
+//             selected_str = sf;
+//             if(sf.size() == 1){
+//                 if (sf.front() == 'M'){
+//                     child->selected = true;
+//                 }else{
+//                     cout<<"The sub_formula is set wrongly!"<<endl;
+//                 }
+//             }else{
+//                 string suf = sf.substr(1);
+//                 if(sf.front() == 'M'){
+//                     child->set_selected_subformula(suf);
+//                 }else{
+//                     cout<<"The sub_formula is set wrongly!"<<endl;
+//                 }
+//             }
+//         }
 
         // update quantitative semantics based on new data
         virtual double update_robustness();
@@ -178,27 +182,27 @@ namespace CPSGrader {
             childR->set_trace_data_ptr(trace);
         }
 
-        virtual void set_selected_subformula(const string &sf){
-            selected_str = sf;
-            if(sf.size()==1){
-                if(sf.front() == 'L'){
-                    childL->selected = true;
-                }else if(sf.front() == 'R'){
-                    childR->selected = true;
-                }else{
-                    cout<<"The sub_formula is set wrongly!"<<endl;
-                }
-            }else{
-                string suf = sf.substr(1);
-                if(sf.front() == 'L'){
-                    childL->set_selected_subformula(suf);
-                }else if(sf.front() == 'R'){
-                    childR->set_selected_subformula(suf);
-                }else{
-                    cout<<"The sub_formula is set wrongly!"<<endl;
-                }
-            }
-        }
+//         virtual void set_selected_subformula(const string &sf){
+//             selected_str = sf;
+//             if(sf.size()==1){
+//                 if(sf.front() == 'L'){
+//                     childL->selected = true;
+//                 }else if(sf.front() == 'R'){
+//                     childR->selected = true;
+//                 }else{
+//                     cout<<"The sub_formula is set wrongly!"<<endl;
+//                 }
+//             }else{
+//                 string suf = sf.substr(1);
+//                 if(sf.front() == 'L'){
+//                     childL->set_selected_subformula(suf);
+//                 }else if(sf.front() == 'R'){
+//                     childR->set_selected_subformula(suf);
+//                 }else{
+//                     cout<<"The sub_formula is set wrongly!"<<endl;
+//                 }
+//             }
+//         }
 
         virtual ~binary_transducer() {
             delete childL;
@@ -301,6 +305,9 @@ namespace CPSGrader {
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
 
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
+
         void print() const{
             print(cout);
         };
@@ -338,6 +345,9 @@ namespace CPSGrader {
 
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
+
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
 
 
         void print() const{
@@ -379,6 +389,9 @@ namespace CPSGrader {
 
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
+
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
 
         void print() const{
             print(cout);
@@ -455,6 +468,9 @@ namespace CPSGrader {
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
 
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
+
 
         void print() const{
             print(cout);
@@ -493,6 +509,9 @@ namespace CPSGrader {
     
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
+
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
 
         void print() const{
             print(cout);
@@ -590,6 +609,9 @@ namespace CPSGrader {
 
         void collect_vio_epoch(vector<double>& vset, double t);
         void collect_sat_epoch(vector<double>& sset, double t);
+
+        double min_shift_vio(double t);
+        double min_shift_sat(double t);
 
         virtual void print(ostream &os) const {
             childL->print(os);
