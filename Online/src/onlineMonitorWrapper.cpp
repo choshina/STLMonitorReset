@@ -9,6 +9,7 @@
 // Need to include simstruc.h for the definition of the SimStruct and
 // its associated macro definitions.
 #include "simstruc.h"
+#include <chrono>
 
 #define SIG_IDX 0
 #define STL_IDX 1
@@ -48,6 +49,7 @@
 
 using namespace std;
 using namespace CPSGrader;
+
 
 /*====================*
  * S-function methods *
@@ -308,6 +310,9 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     real_T             T        =  ssGetT(S);
 
 
+    //start_time
+    auto start = std::chrono::high_resolution_clock::now();
+
     //make data precise to handle numerical error
     double rT = (double)T;
     rT = (int)(rT*10 + 0.5); //refresh rate = 0.1
@@ -346,13 +351,13 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             if(rob_up<0){
                 phi->collect_vio_epoch(vio_set, phi->start_time);
                 if (stl_driver->set_epoch(vio_set)){
-                    cout<<"Reset Now~~"<<endl;
+                    //cout<<"Reset Now~~"<<endl;
                     //cout<<"tau: "<< stl_driver->data.back().front()<<endl;
 //                     if(stl_driver->data.back().front() > 12.68 && stl_driver->data.back().front() < 12.72){
 //                         flag = 1;
 //                     }
                     double delta = phi->min_shift_vio(phi->start_time);
-                    cout<<"delta: " << delta<<endl;
+                    //cout<<"delta: " << delta<<endl;
                     stl_driver->reset_monitor(delta);
                 }
 
@@ -360,7 +365,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
                 phi->collect_sat_epoch(sat_set, phi->start_time);
                 stl_driver->set_epoch(sat_set);
                 if (stl_driver->set_epoch(vio_set)){
-                    cout<<"Reset Now~~"<<endl;
+                    //cout<<"Reset Now~~"<<endl;
                     double delta = phi->min_shift_vio(phi->start_time);
                     stl_driver->reset_monitor(delta);
                 }
@@ -381,6 +386,13 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         delete phi;
     }  
    
+    auto stop = std::chrono::high_resolution_clock::now();
+    //std::chrono::duration<microseconds> diff = stop - start;
+    //auto duration = duration_cast<microseconds>(stop - start);
+    std::chrono::duration<double, std::milli> diff = stop - start;
+    stl_driver->update_time(diff.count());
+
+
     if (rob_up==TOP)
         rob_up= max_rob;
     if (rob_low==BOTTOM)
@@ -419,7 +431,10 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 static void mdlTerminate(SimStruct *S)
 {
     // Retrieve and destroy C++ object
+
     STLDriver *stl_driver = static_cast<STLDriver *>(ssGetPWork(S)[0]);
+    cout<< "reset nums: " << stl_driver->num_reset <<endl;
+    cout<< "block time cost: " << stl_driver->elapse_time <<endl;
     delete stl_driver;
 }
 

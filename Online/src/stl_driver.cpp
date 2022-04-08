@@ -29,7 +29,9 @@ STLDriver::STLDriver()
   nb_test_pos(0),
   error_flag(false),
   diagnose(0),
-  sum_shift(0)
+  sum_shift(0),
+  num_reset(0),
+  elapse_time(0)
 {
 }
 
@@ -42,7 +44,9 @@ STLDriver::STLDriver(trace_data _trace)
   nb_test_pos(0),
   error_flag(false),
   diagnose(0),
-  sum_shift(0)
+  sum_shift(0),
+  num_reset(0),
+  elapse_time(0)
 {
 	data = _trace;
 };
@@ -393,7 +397,7 @@ void STLDriver::set_diagnose(double d){
 bool STLDriver::set_epoch(const vector<double> &epo){
     int old_size = epoch.size();
     int new_size = epo.size();
-    cout<<"old: "<<old_size<<"new: "<<new_size <<endl;
+    //cout<<"old: "<<old_size<<"new: "<<new_size <<endl;
 
     epoch = epo;
 
@@ -409,6 +413,7 @@ bool STLDriver::set_epoch(const vector<double> &epo){
 
 void STLDriver::reset_monitor(double v_shift){
     //shift data
+    num_reset = num_reset + 1;
     double shift = v_shift + 0.1; //mitigate the numerical error
     sum_shift = sum_shift + shift;
     
@@ -425,6 +430,10 @@ void STLDriver::reset_monitor(double v_shift){
     }
     data = new_data;
     epoch.clear();
+}
+
+void STLDriver::update_time(double t){
+    elapse_time = elapse_time + t;
 }
 
 } // namespace CPSGrader

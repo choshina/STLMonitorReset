@@ -97,6 +97,12 @@ public:
 	trace_data data;
 	deque<trace_test> trace_test_queue;
 
+    /** reset times*/
+    int num_reset;
+
+    /** elapse time*/
+    double elapse_time;
+
 	string report;
 	string test_log;
 	int nb_test_pos;
@@ -128,6 +134,9 @@ public:
 
     /** set sub_form */
     //void set_sub_form(const string &sf);
+
+    /** update elapsed time*/
+    void update_time(double);
 
     /** set diagnose */
     void set_diagnose(double);
