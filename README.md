@@ -37,4 +37,6 @@ Online monitoring is a popular validation approach in which the temporal behavio
 
 ## Extended experimental results
 
-![experiment in paper!](/Online/experiment/effect.png)
+![experiment in paper](/Online/experiment/effect.png)
+
+![another example](/Online/experiment/case2.png)
