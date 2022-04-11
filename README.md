@@ -15,6 +15,7 @@ Online monitoring is a popular validation approach in which the temporal behavio
  1. start matlab, set up a C/C++ compiler using the command `mex -setup`. (Refer to [here](https://www.mathworks.com/help/matlab/matlab_external/changing-default-compiler.html) for more details.)
   
  2. navigate to home in Matlab commandline, and run `InstallBreach`
+  > Note that we customized `InstallBreach`. It only compiles the online monitoring component. For the full functionality of Breach, please refer to [the original repository](https://github.com/decyphir/breach)
 
 ## Instructions on reproduction of experiment results
  
@@ -30,7 +31,9 @@ Online monitoring is a popular validation approach in which the temporal behavio
 - For AFC: Line 23
 - For AT: Line 9
 
-### input data
+### Input data
+
+Select one input signal by uncommenting out one line, and commenting out the other lines.
 
 - For AFC: Line 12-21
 - For AT: Line 14-23
