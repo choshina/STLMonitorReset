@@ -1,6 +1,4 @@
-# Online Reset for STL Monitoring
-
-Online monitoring is a popular validation approach in which the temporal behavior of a system is checked to assess whether it satisfies a given specification expressed, e.g., in Signal Temporal Logic (STL). This is done by employing a monitor that, at each time point, states the specification validity: satisfied, violated, or unknown. In some settings, monitoring should continue even after a violation episode is detected, to detect possible future violation episodes. However, for a monitor just relying on STL semantics, this is not possible, as, once the specification is violated by an input signal, any continuation of the signal still violates the specification. To tackle this problem, we here propose an optimal reset technique that, at runtime, detects the end of a violation episode and shifts the evaluation of the monitor to skip such episode. In this way, the monitoring can continue to detect possible other future violation episodes. We propose a framework that integrates the reset technique with an existing monitoring approach. Experiments on two Simulink models show that the technique can effectively reset the monitor and report all the violation episodes, with a negligible overhead on the monitoring cost.
+# CAV 2023:
 
 ## System requirement
 
