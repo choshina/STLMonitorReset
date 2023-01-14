@@ -142,8 +142,13 @@ public:
     void set_diagnose(double);
 
     /** set sat/vio epoch*/
-    //return if should reset. Yes if diagnose == 2 and epoch size changes
-    bool set_epoch(const vector<double> &epo);
+    void set_epoch(const vector<double> &epo);
+
+    /** return if should reset. Yes if diagnose == 2 and epoch size doesn't change*/
+    bool should_reset(const vector<double> &epo);
+
+    /** check if the epoch size increases*/
+    bool epoch_increase(const vector<double> &epo);
 
     /** reset monitor*/
     void reset_monitor(double);

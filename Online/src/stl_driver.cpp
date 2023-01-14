@@ -394,21 +394,32 @@ void STLDriver::set_diagnose(double d){
     diagnose = d;
 }
 
-bool STLDriver::set_epoch(const vector<double> &epo){
-    int old_size = epoch.size();
-    int new_size = epo.size();
+void STLDriver::set_epoch(const vector<double> &epo){
+//     int old_size = epoch.size();
+//     int new_size = epo.size();
     //cout<<"old: "<<old_size<<"new: "<<new_size <<endl;
 
     epoch = epo;
 
-    bool should_reset = (new_size == old_size && diagnose == 2);
-    return should_reset;
+//     bool should_reset = (new_size == old_size && diagnose == 2);
+//     return should_reset;
+}
 
-//     if(new_size == old_size && diagnose == 2){ //reset
-//         double reset_loc = epo.back();
-//         reset_monitor(reset_loc);
-//         cout<<"RESET NOW!!";
-//     }
+bool STLDriver::should_reset(const vector<double> &epo){
+    int old_size = epoch.size();
+    int new_size = epo.size();
+
+    return (new_size == old_size && diagnose == 2);
+    //here we don't have to guarantee new_size or old_size > 0,
+    //because this method is only called when robust < 0,
+    //i.e., epoch size must be larger than 0
+}
+
+bool STLDriver::epoch_increase(const vector<double> &epo){
+    int old_size = epoch.size();
+    int new_size = epo.size();
+    
+    return new_size > old_size;
 }
 
 void STLDriver::reset_monitor(double v_shift){

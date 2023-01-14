@@ -329,12 +329,23 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     
     stl_driver->data.push_back(points);
     
+    //classic monitoring results
     double rob_up = max_rob;
     double rob_low= -max_rob;
+
+    //Boolean non-monotone results
+    bool b_nmono_up = true;
+    bool b_nmono_low = false;
+
+    //quantitative non-monotone results
+    double q_nmono_up = max_rob;
+    double q_nmono_low = -max_rob;
+
     Signal z_up, z_low;
      
-    int vio_epoch = 0;
-    int sat_epoch = 0;
+    //int vio_epoch = 0;
+    //int sat_epoch = 0;
+
 
     if (stl_driver->data.size()>2) {
         transducer *phi = stl_driver->formula_map["phi"]->clone();
@@ -347,30 +358,94 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         vector<double> vio_set;
         vector<double> sat_set;
 
-        if(stl_driver->diagnose != 0){
+//== from here, the code from EMSOFT'22
+//
+//         if(stl_driver->diagnose != 0){
+//             if(rob_up<0){
+//                 phi->collect_vio_epoch(vio_set, phi->start_time);
+//                 //the commented code is from EMSOFT'22, we now separate the functions set_epoch and should_reset           
+//                 //if (stl_driver->set_epoch(vio_set)){ 
+//                 if (stl_driver-> should_reset(vio_set)){
+//                     double delta = phi->min_shift_vio(phi->start_time);
+//                     stl_driver->reset_monitor(delta);
+//                 }else{
+//                     stl_driver-> set_epoch(vio_set);
+//                 }
+// 
+//             }else if(rob_low > 0){
+//                 phi->collect_sat_epoch(sat_set, phi->start_time);
+//                 //the commented code is from EMSOFT'22, we now separate the functions set_epoch and should_reset
+//                 //if (stl_driver->set_epoch(sat_set)){
+//                 if(stl_driver-> should_reset(sat_set))
+//                     double delta = phi->min_shift_sat(phi->start_time);
+//                     stl_driver->reset_monitor(delta);
+//                 }else{
+//                     stl_driver-> set_epoch(sat_set);
+//                 }
+//             }
+//         }
+//== EMSOFT'22 code ends here
+
+
+
+
+//== from here, the code of CAV'23
+//
+        if(stl_driver->diagnose  == 1){
+            // collect epoch only
             if(rob_up<0){
                 phi->collect_vio_epoch(vio_set, phi->start_time);
-                if (stl_driver->set_epoch(vio_set)){
-                    //cout<<"Reset Now~~"<<endl;
-                    //cout<<"tau: "<< stl_driver->data.back().front()<<endl;
-//                     if(stl_driver->data.back().front() > 12.68 && stl_driver->data.back().front() < 12.72){
-//                         flag = 1;
-//                     }
-                    double delta = phi->min_shift_vio(phi->start_time);
-                    //cout<<"delta: " << delta<<endl;
-                    stl_driver->reset_monitor(delta);
-                }
-
+                stl_driver->set_epoch(vio_set);
             }else if(rob_low > 0){
                 phi->collect_sat_epoch(sat_set, phi->start_time);
                 stl_driver->set_epoch(sat_set);
-                if (stl_driver->set_epoch(vio_set)){
-                    //cout<<"Reset Now~~"<<endl;
+            }
+        }else if(stl_driver -> diagnose == 2){
+            // collect epoch and reset
+            if(rob_up < 0){
+                phi->collect_vio_epoch(vio_set, phi->start_time);
+                if(stl_driver-> should_reset(vio_set)){
                     double delta = phi->min_shift_vio(phi->start_time);
                     stl_driver->reset_monitor(delta);
+                }else{
+                    stl_driver-> set_epoch(vio_set);
+                }
+            }else if(rob_low > 0){
+                phi->collect_sat_epoch(sat_set, phi->start_time);
+                if (stl_driver->should_reset(sat_set)){
+                    double delta = phi->min_shift_sat(phi->start_time);
+                    stl_driver->reset_monitor(delta);
+                }else{
+                    stl_driver-> set_epoch(sat_set);
                 }
             }
+        }else if(stl_driver -> diagnose == 3){
+            // collect epoch and compute Boolean non-monotone semantics
+            if(rob_up < 0){
+                phi->collect_vio_epoch(vio_set, phi-> start_time);
+                if(stl_driver->epoch_increase(vio_set)){
+                    b_nmono_up = false;
+                    stl_driver -> set_epoch(vio_set);
+                }
+            }else if(rob_low > 0){
+                phi->collect_sat_epoch(sat_set, phi-> start_time);
+                if(stl_driver->epoch_increase(sat_set)){
+                    b_nmono_low = true;
+                    stl_driver -> set_epoch(sat_set);
+                }
+            }
+        }else if(stl_driver -> diagnose == 4){
+            // compute quantitative non-monotone semantics according to CAV'23
+            // use one more parameter t to indicate the current time, rather than creat new formula class
+            
+            // report q_nmono_up
+            q_nmono_up = phi->compute_qnmono_upper(phi-> start_time, rT); 
+
+            // report q_nmono_low
+            q_nmono_low = phi->compute_qnmono_lower(phi-> start_time, rT);
         }
+//== CAV'23 code ends here
+
 
        //if(stl_driver->data.back().front() == 16){
 //         cout<<flag<<endl;
