@@ -302,6 +302,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     STLDriver *stl_driver = static_cast<STLDriver *>(ssGetPWork(S)[0]);
     double max_rob = mxGetScalar(MAX_ROB(S));
     Signal::BigM = max_rob;
+    Signal::MaxLength = 10000;
     
     // Get data addresses of I/O
     InputRealPtrsType  u        =  ssGetInputPortRealSignalPtrs(S,0);

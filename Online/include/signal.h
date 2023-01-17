@@ -74,6 +74,7 @@ class Signal : public std::deque<Sample> {
 public:
 
 	static double BigM;
+    static double MaxLength;
 
 	double beginTime;
 	double endTime;

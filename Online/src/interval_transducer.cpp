@@ -104,8 +104,10 @@ namespace CPSGrader {
     }
 
     double and_transducer::min_shift_vio(double t){
-        double a = - Signal::BigM;
-        double b = - Signal::BigM;
+        //double a = - Signal::BigM;
+        //double b = - Signal::BigM;
+        double a = - Signal::MaxLength;
+        double b = - Signal::MaxLength;
         if (childL->get_zup(t)<0 ){
             a = childL->min_shift_vio(t);
         }
@@ -116,8 +118,10 @@ namespace CPSGrader {
     }
 
     double and_transducer::min_shift_sat(double t){
-        double a = Signal::BigM;
-        double b = Signal::BigM;
+        //double a = Signal::BigM;
+        //double b = Signal::BigM;
+        double a = Signal::MaxLength;
+        double b = Signal::MaxLength;
         if (childL->get_zlow(t)>0){
             a = childL->min_shift_sat(t);
         }
@@ -125,6 +129,22 @@ namespace CPSGrader {
             b = childR->min_shift_sat(t);
         }
         return a<b?a:b;
+    }
+
+    double and_transducer::compute_qnmono_upper(double tau, double b){
+        double a = childL->compute_qnmono_upper(tau, b);
+        double b = childR->compute_qnmono_upper(tau, b);
+        return a<b?a:b;
+    }
+
+    double and_transducer::compute_qnmono_lower(double tau, double b){
+        double a1 = childL->compute_qnmono_lower(tau, b);
+        double a2 = childR->get_zlow(tau);
+        double a = a1<a2?a1:a2;
+        double b1 = childL->get_zlow(tau);
+        double b2 = childR->compute_qnmono_lower(tau, b);
+        double b = b1<b2?b1:b2;
+        return a>b?a:b;
     }
     
     double or_transducer::compute_lower_rob(){
@@ -174,8 +194,10 @@ namespace CPSGrader {
     }
 
     double or_transducer::min_shift_vio(double t){
-        double a = Signal::BigM;
-        double b = Signal::BigM;
+        //double a = Signal::BigM;
+        //double b = Signal::BigM;
+        double a = Signal::MaxLength;
+        double b = Signal::MaxLength;
         if (childL->get_zup(t)<0 ){
             a = childL->min_shift_vio(t);
         }
@@ -186,14 +208,32 @@ namespace CPSGrader {
     }
 
     double or_transducer::min_shift_sat(double t){
-        double a = - Signal::BigM;
-        double b = - Signal::BigM;
+        //double a = - Signal::BigM;
+        //double b = - Signal::BigM;
+        double a = - Signal::MaxLength;
+        double b = - Signal::MaxLength;
         if (childL->get_zlow(t)>0){
             a = childL->min_shift_sat(t);
         }
         if(childR->get_zlow(t)>0){
             b = childR->min_shift_sat(t);
         }
+        return a>b?a:b;
+    }
+
+    double or_transducer::compute_qnmono_upper(double tau, double b){
+        double a1 = childL->compute_qnmono_upper(tau, b);
+        double a2 = childR->get_zup(tau);
+        double a = a1>a2?a1:a2;
+        double b1 = childL->get_zup(tau);
+        double b2 = childR->compute_qnmono_upper(tau, b);
+        double b = b1>b2?b1:b2;
+        return a<b?a:b;
+    }
+
+    double or_transducer::compute_qnmono_lower(double tau, double b){
+        double a = childL->compute_qnmono_lower(tau, b);
+        double b = childR->compute_qnmono_lower(tau, b);
         return a>b?a:b;
     }
 
@@ -261,6 +301,16 @@ namespace CPSGrader {
 
     double not_transducer::min_shift_sat(double t){
         return child->min_shift_vio(t);
+    }
+
+    double not_transducer::compute_qnmono_upper(double tau, double b){
+        double dis = child->compute_qnmono_lower(tau, b);
+        return 0 - dis;
+    }
+
+    double not_transducer::compute_qnmono_lower(double tau, double b){
+        double dis = child->compute_qnmono_upper(tau, b);
+        return 0 - dis;
     }
 
     // EVENTUALLY
@@ -355,7 +405,8 @@ namespace CPSGrader {
     }
 
     double ev_transducer::min_shift_vio(double t){
-        double a = Signal::BigM;
+        //double a = Signal::BigM;
+        double a = Signal::MaxLength;
         for(auto i = child->z_up.begin(); i!=child->z_up.end(); i ++){
             if(child->get_zup((*i).time) < 0){
                 double b = child->min_shift_vio((*i).time);
@@ -368,13 +419,29 @@ namespace CPSGrader {
     }
 
     double ev_transducer::min_shift_sat(double t){
-        double a = - Signal::BigM;
+        //double a = - Signal::BigM;
+        double a = - Signal::MaxLength;
         for(auto i = child->z_low.begin();i!=child->z_low.end();i ++){
             if(child->get_zlow((*i).time)>0){
                 double b = child->min_shift_sat((*i).time);
                 if(b>a){
                     a = b;
                 }
+            }
+        }
+        return a;
+    }
+
+    double ev_transducer::compute_qnmono_upper(double tau, double b){
+        return get_zup(tau);
+    }
+
+    double ev_transducer::compute_qnmono_lower(double tau, double b){
+        double a = - Signal::BigM;
+        for(auto i = child->z_low.begin(); i!=child->z_low.end();i ++){
+            double b = child->compute_qnmono_lower((*i).time);
+            if(b>a){
+                a = b;
             }
         }
         return a;
@@ -491,7 +558,8 @@ namespace CPSGrader {
     }
 
     double alw_transducer::min_shift_vio(double t){
-        double a = - Signal::BigM;
+        //double a = - Signal::BigM;
+        double a = - Signal::MaxLength;
         for(auto i = child->z_up.begin(); i!=child->z_up.end(); i ++){
             if(child->get_zup((*i).time) < 0){
                 double b = child->min_shift_vio((*i).time);
@@ -504,7 +572,8 @@ namespace CPSGrader {
     }
 
     double alw_transducer::min_shift_sat(double t){
-        double a = Signal::BigM;
+        //double a = Signal::BigM;
+        double a = Signal::MaxLength;
         for(auto i = child->z_low.begin();i!=child->z_low.end();i ++){
             if(child->get_zlow((*i).time)>0){
                 double b = child->min_shift_sat((*i).time);
@@ -514,6 +583,21 @@ namespace CPSGrader {
             }
         }
         return a;
+    }
+
+    double alw_transducer::compute_qnmono_upper(double tau, double b){
+        double a = Signal::BigM;
+        for(auto i = child->z_up.begin();i!=child->z_up.end();i ++){
+            double b = child->compute_qnmono_upper((*i).time, b);
+            if(b<a){
+                a = b;
+            }
+        }
+        return a;
+    }
+
+    double alw_transducer::compute_qnmono_lower(double tau, double b){
+        return get_zlow(tau);
     }
 
     // TODO the following is a super conservative implementation - (how) can we do better ?

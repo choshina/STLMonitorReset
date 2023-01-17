@@ -72,6 +72,12 @@ namespace CPSGrader {
         virtual double min_shift_vio(double t){return 0;}
         virtual double min_shift_sat(double t){return 0;}
 
+        //quantitative non-monotone monitoring
+        //first arg: start time
+        //second arg: current time
+        virtual double compute_qnmono_upper(double start_time, double current_time){return 0};
+        virtual double compute_qnmono_lower(double start_time, double current_time){return 0};
+
         double get_zup(double t){
             return z_up.get_value(t, 1);
         }

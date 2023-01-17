@@ -74,6 +74,22 @@ namespace CPSGrader {
         return t - start_time;
     }
 
+    double stl_atom::compute_qnmono_upper(double tau, double b){
+        if(tau == b){
+            return get_zup(tau);
+        }else{
+            return Signal::BigM;
+        }
+    }
+
+    double stl_atom::compute_qnmono_lower(double tau, double b){
+        if(tau == b){
+            return get_zlow(tau);
+        }else{
+            return - Signal::BigM;
+        }
+    }
+
     
     double signal_transducer::compute_robustness() {
 #ifdef DEBUG__
