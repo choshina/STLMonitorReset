@@ -18,6 +18,7 @@ map<string, token_type> STLDriver::reserved = map<string,token_type>(); // fille
     //map<string, double> transducer::param_map = map<string, double>();
 
 double Signal::BigM = 100.;
+double Signal::MaxLength = 10000;
 //vector<vector<double>> *transducer::trace_data_ptr = nullptr;
 
 STLDriver::STLDriver()

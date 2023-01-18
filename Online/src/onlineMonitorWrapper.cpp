@@ -30,8 +30,8 @@
 #define NOUTPORT 2
 #define UP_IDX 0
 #define LOW_IDX 1
-//#define VIO_IDX 2
-//#define SAT_IDX 3
+//#define NMUP_IDX 2
+//#define NMLOW_IDX 3
 
 
 #if !defined(MATLAB_MEX_FILE)
@@ -238,8 +238,8 @@ static void mdlInitializeConditions(SimStruct *S)
 
     x0[UP_IDX]  =  max_rob;
     x0[LOW_IDX] = -max_rob;
-    //x0[VIO_IDX] = 0;
-    //x0[SAT_IDX] = 0;
+    //x0[NMUP_IDX] = max_rob;
+    //x0[NMLOW_IDX] = -max_rob;
 }
 
 
@@ -440,10 +440,11 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             // use one more parameter t to indicate the current time, rather than creat new formula class
             
             // report q_nmono_up
-            q_nmono_up = phi->compute_qnmono_upper(phi-> start_time, rT); 
+            q_nmono_up = phi->compute_qnmono_upper(phi-> start_time, rT);
 
             // report q_nmono_low
             q_nmono_low = phi->compute_qnmono_lower(phi-> start_time, rT);
+            //cout<<"debug: " << q_nmono_up << " " <<endl;
         }
 //== CAV'23 code ends here
 
@@ -473,11 +474,31 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         rob_up= max_rob;
     if (rob_low==BOTTOM)
         rob_low= -max_rob;
+
+    //cout<<rob_up<<rob_low<<endl;
     
     xd[UP_IDX] =  rob_up;
     xd[LOW_IDX] = rob_low;
-    //xd[VIO_IDX] = vio_epoch;
-    //xd[SAT_IDX] = sat_epoch;
+    if(stl_driver->diagnose == 3){
+        //xd[UP_IDX] = b_nmono_up? max_rob:-max_rob;
+        //xd[LOW_IDX] = b_nmono_low? -max_rob:max_rob;
+        if(!b_nmono_up){
+            xd[UP_IDX] = -1;
+            xd[LOW_IDX] = -1;
+        }else if(b_nmono_low){
+            xd[UP_IDX] = 1;
+            xd[LOW_IDX] = 1;
+        }else{
+            xd[UP_IDX] = 0;
+            xd[LOW_IDX] = 0;
+        }
+    }else if(stl_driver->diagnose == 4){
+        xd[UP_IDX] = q_nmono_up;
+        xd[LOW_IDX] = q_nmono_low;
+    }
+
+    cout<<rT<<" " <<b_nmono_up<<" "<<b_nmono_low<<endl;
+    //cout<< "data:" <<xd[UP_IDX] <<" " <<xd[LOW_IDX] << " "<<xd[NMUP_IDX] <<" "<<xd[NMLOW_IDX]<<endl;
 }
 
 
@@ -493,8 +514,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
        
     y[UP_IDX] =  xd[UP_IDX];
     y[LOW_IDX] = xd[LOW_IDX];
-    //y[VIO_IDX] = xd[VIO_IDX];
-    //y[SAT_IDX] = xd[SAT_IDX];
+    //y[NMUP_IDX] = xd[NMUP_IDX];
+    //y[NMLOW_IDX] = xd[NMLOW_IDX];
     
 }
 

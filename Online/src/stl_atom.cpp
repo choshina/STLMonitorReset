@@ -75,8 +75,12 @@ namespace CPSGrader {
     }
 
     double stl_atom::compute_qnmono_upper(double tau, double b){
+//         if(b == 9.8 || b == 10 || b == 10.2){
+//             cout<<"ddddd:   "<<z_up<<endl;
+//             cout<<"zzzzz:   "<<z <<endl;
+//         }
         if(tau == b){
-            return get_zup(tau);
+            return get_z(tau, 1);
         }else{
             return Signal::BigM;
         }
@@ -84,7 +88,7 @@ namespace CPSGrader {
 
     double stl_atom::compute_qnmono_lower(double tau, double b){
         if(tau == b){
-            return get_zlow(tau);
+            return get_z(tau, -1);
         }else{
             return - Signal::BigM;
         }

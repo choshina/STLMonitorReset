@@ -20,11 +20,11 @@ input = [14.6189808085505	50.1158556033517	1054.98209294230	1063.46064413069	107
 %input = [8.37719409821377	72.5013461604416	973.849356224043	922.240551058757	1056.05041366423];
 %input = [10.6119979270966	72.0466625112953	1033.83506090688	938.086653435991	973.783309212779];
 
-d = 2;
+d = 3;
 
 BrAFC.ResetSimulations();
 BrAFC.SetParam({'Pedal_Angle_pulse_period', 'Pedal_Angle_pulse_amp', 'Engine_Speed_u0','Engine_Speed_u1','Engine_Speed_u2'}, input);
-BrAFC.SetParam({'max_rob', 'diagnoser'}, [.5, d]);
+BrAFC.SetParam({'max_rob', 'diagnoser'}, [1, d]);
 times = 1;
 tic
 for i = 1:times

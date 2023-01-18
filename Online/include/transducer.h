@@ -75,8 +75,8 @@ namespace CPSGrader {
         //quantitative non-monotone monitoring
         //first arg: start time
         //second arg: current time
-        virtual double compute_qnmono_upper(double start_time, double current_time){return 0};
-        virtual double compute_qnmono_lower(double start_time, double current_time){return 0};
+        virtual double compute_qnmono_upper(double start_time, double current_time){return 0;}
+        virtual double compute_qnmono_lower(double start_time, double current_time){return 0;}
 
         double get_zup(double t){
             return z_up.get_value(t, 1);
@@ -314,6 +314,9 @@ namespace CPSGrader {
         double min_shift_vio(double t);
         double min_shift_sat(double t);
 
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
+
         void print() const{
             print(cout);
         };
@@ -354,6 +357,9 @@ namespace CPSGrader {
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
+
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
 
 
         void print() const{
@@ -398,6 +404,9 @@ namespace CPSGrader {
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
+
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
 
         void print() const{
             print(cout);
@@ -477,6 +486,9 @@ namespace CPSGrader {
         double min_shift_vio(double t);
         double min_shift_sat(double t);
 
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
+
 
         void print() const{
             print(cout);
@@ -518,6 +530,9 @@ namespace CPSGrader {
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
+
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
 
         void print() const{
             print(cout);
@@ -618,6 +633,13 @@ namespace CPSGrader {
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
+
+        double compute_qnmono_upper(double tau, double b);
+        double compute_qnmono_lower(double tau, double b);
+
+        double get_z(double t, int dir){
+            return z.get_value(t, dir);
+        }
 
         virtual void print(ostream &os) const {
             childL->print(os);

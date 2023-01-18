@@ -132,19 +132,19 @@ namespace CPSGrader {
     }
 
     double and_transducer::compute_qnmono_upper(double tau, double b){
-        double a = childL->compute_qnmono_upper(tau, b);
-        double b = childR->compute_qnmono_upper(tau, b);
-        return a<b?a:b;
+        double x = childL->compute_qnmono_upper(tau, b);
+        double y = childR->compute_qnmono_upper(tau, b);
+        return x<y?x:y;
     }
 
     double and_transducer::compute_qnmono_lower(double tau, double b){
-        double a1 = childL->compute_qnmono_lower(tau, b);
-        double a2 = childR->get_zlow(tau);
-        double a = a1<a2?a1:a2;
-        double b1 = childL->get_zlow(tau);
-        double b2 = childR->compute_qnmono_lower(tau, b);
-        double b = b1<b2?b1:b2;
-        return a>b?a:b;
+        double x1 = childL->compute_qnmono_lower(tau, b);
+        double x2 = childR->get_zlow(tau);
+        double x = x1<x2?x1:x2;
+        double y1 = childL->get_zlow(tau);
+        double y2 = childR->compute_qnmono_lower(tau, b);
+        double y = y1<y2?y1:y2;
+        return x>y?x:y;
     }
     
     double or_transducer::compute_lower_rob(){
@@ -222,19 +222,19 @@ namespace CPSGrader {
     }
 
     double or_transducer::compute_qnmono_upper(double tau, double b){
-        double a1 = childL->compute_qnmono_upper(tau, b);
-        double a2 = childR->get_zup(tau);
-        double a = a1>a2?a1:a2;
-        double b1 = childL->get_zup(tau);
-        double b2 = childR->compute_qnmono_upper(tau, b);
-        double b = b1>b2?b1:b2;
-        return a<b?a:b;
+        double x1 = childL->compute_qnmono_upper(tau, b);
+        double x2 = childR->get_zup(tau);
+        double x = x1>x2?x1:x2;
+        double y1 = childL->get_zup(tau);
+        double y2 = childR->compute_qnmono_upper(tau, b);
+        double y = y1>y2?y1:y2;
+        return x<y?x:y;
     }
 
     double or_transducer::compute_qnmono_lower(double tau, double b){
-        double a = childL->compute_qnmono_lower(tau, b);
-        double b = childR->compute_qnmono_lower(tau, b);
-        return a>b?a:b;
+        double x = childL->compute_qnmono_lower(tau, b);
+        double y = childR->compute_qnmono_lower(tau, b);
+        return x>y?x:y;
     }
 
 // IMPLIES transducer
@@ -305,12 +305,12 @@ namespace CPSGrader {
 
     double not_transducer::compute_qnmono_upper(double tau, double b){
         double dis = child->compute_qnmono_lower(tau, b);
-        return 0 - dis;
+        return -dis;
     }
 
     double not_transducer::compute_qnmono_lower(double tau, double b){
         double dis = child->compute_qnmono_upper(tau, b);
-        return 0 - dis;
+        return -dis;
     }
 
     // EVENTUALLY
@@ -437,14 +437,14 @@ namespace CPSGrader {
     }
 
     double ev_transducer::compute_qnmono_lower(double tau, double b){
-        double a = - Signal::BigM;
+        double x = - Signal::BigM;
         for(auto i = child->z_low.begin(); i!=child->z_low.end();i ++){
-            double b = child->compute_qnmono_lower((*i).time);
-            if(b>a){
-                a = b;
+            double y = child->compute_qnmono_lower((*i).time, b);
+            if(y>x){
+                x = y;
             }
         }
-        return a;
+        return x;
     }
 
     // ALWAYS
@@ -586,14 +586,14 @@ namespace CPSGrader {
     }
 
     double alw_transducer::compute_qnmono_upper(double tau, double b){
-        double a = Signal::BigM;
+        double x = Signal::BigM;
         for(auto i = child->z_up.begin();i!=child->z_up.end();i ++){
-            double b = child->compute_qnmono_upper((*i).time, b);
-            if(b<a){
-                a = b;
+            double y = child->compute_qnmono_upper((*i).time, b);
+            if(y<x){
+                x = y;
             }
         }
-        return a;
+        return x;
     }
 
     double alw_transducer::compute_qnmono_lower(double tau, double b){
