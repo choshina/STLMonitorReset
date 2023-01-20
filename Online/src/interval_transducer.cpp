@@ -146,6 +146,14 @@ namespace CPSGrader {
         double y = y1<y2?y1:y2;
         return x>y?x:y;
     }
+
+    double and_transducer::improved_qnmono_upper(double tau, double b){
+        return compute_qnmono_upper(tau, b);
+    }
+    
+    double and_transducer::improved_qnmono_lower(double tau, double b){
+        return compute_qnmono_lower(tau, b);
+    }
     
     double or_transducer::compute_lower_rob(){
         childL->compute_lower_rob();
@@ -237,6 +245,14 @@ namespace CPSGrader {
         return x>y?x:y;
     }
 
+    double or_transducer::improved_qnmono_upper(double tau, double b){
+        compute_qnmono_upper(tau, b);
+    }
+
+    double or_transducer::improved_qnmono_lower(double tau, double b){
+        compute_qnmono_lower(tau, b);
+    }
+
 // IMPLIES transducer
     double implies_transducer::compute_lower_rob(){
         childL->compute_upper_rob();
@@ -311,6 +327,14 @@ namespace CPSGrader {
     double not_transducer::compute_qnmono_lower(double tau, double b){
         double dis = child->compute_qnmono_upper(tau, b);
         return -dis;
+    }
+
+    double not_transducer::improved_qnmono_upper(double tau, double b){
+        compute_qnmono_upper(tau, b);
+    }
+
+    double not_transducer::improved_qnmono_lower(double tau, double b){
+        compute_qnmono_lower(tau, b);
     }
 
     // EVENTUALLY
@@ -442,6 +466,29 @@ namespace CPSGrader {
             double y = child->compute_qnmono_lower((*i).time, b);
             if(y>x){
                 x = y;
+            }
+        }
+        return x;
+    }
+
+    double ev_transducer::improved_qnmono_upper(double tau, double b){
+        compute_qnmono_upper(tau, b);
+    }
+
+    double ev_transducer::improved_qnmono_lower(double tau, double b){
+        //TODO
+        double x = - Signal::BigM;
+        for(auto i = child->z_low.begin(); i!=child->z_low.end();i ++){
+            double t = (*i).time;
+            if(t< b - child->duration){
+                continue;
+            }else if(t > b){
+                break;
+            }else{
+                double y = child->compute_qnmono_lower(t, b);
+                if(y>x){
+                    x = y;
+                }
             }
         }
         return x;
@@ -598,6 +645,29 @@ namespace CPSGrader {
 
     double alw_transducer::compute_qnmono_lower(double tau, double b){
         return get_zlow(tau);
+    }
+
+    double alw_transducer::improved_qnmono_upper(double tau, double b){
+        //TODO
+        double x = Signal::BigM;
+        for(auto i = child->z_up.begin();i!=child->z_up.end();i ++){
+            double t = (*i).time;
+            if(t< b - child->duration){
+                continue;
+            }else if(t > b){
+                break;
+            }else{
+                double y = child->compute_qnmono_upper(t, b);
+                if(y<x){
+                    x = y;
+                }
+            }
+        }
+        return x;
+    }
+
+    double alw_transducer::improved_qnmono_lower(double tau, double b){
+        compute_qnmono_lower(tau, b);
     }
 
     // TODO the following is a super conservative implementation - (how) can we do better ?

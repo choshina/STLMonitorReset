@@ -351,6 +351,8 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     if (stl_driver->data.size()>2) {
         transducer *phi = stl_driver->formula_map["phi"]->clone();
         phi->set_trace_data_ptr(stl_driver->data);
+
+        phi->set_duration();
         //phi->set_selected_subformula(stl_driver->sub_form);
         
         rob_up  = phi->compute_upper_rob();
@@ -445,6 +447,12 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             // report q_nmono_low
             q_nmono_low = phi->compute_qnmono_lower(phi-> start_time, rT);
             //cout<<"debug: " << q_nmono_up << " " <<endl;
+        }else if(stl_driver -> diagnose == 5){
+            // a more efficient version of Mode 4
+            // with the heuristics for alw and ev temporal operators
+            q_nmono_up = phi->improved_qnmono_upper(phi-> start_time, rT);
+
+            q_nmono_low = phi->improved_qnmono_lower(phi-> start_time, rT);
         }
 //== CAV'23 code ends here
 
@@ -492,7 +500,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             xd[UP_IDX] = 0;
             xd[LOW_IDX] = 0;
         }
-    }else if(stl_driver->diagnose == 4){
+    }else if(stl_driver->diagnose == 4 || stl_driver->diagnose == 5){
         xd[UP_IDX] = q_nmono_up;
         xd[LOW_IDX] = q_nmono_low;
     }

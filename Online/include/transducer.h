@@ -38,6 +38,8 @@ namespace CPSGrader {
         // if the formula is selected as the sub-formula
         //bool selected;
         //string selected_str;
+        double duration;
+
 
         transducer(): start_time(0.), end_time(0.) {};
         
@@ -53,6 +55,8 @@ namespace CPSGrader {
             end_time = e;
             init_horizon();
         }
+
+        virtual void set_duration(){}
 
         // set trace data 
         // TODO should be done at the constructor, parser and cloning level...
@@ -77,6 +81,9 @@ namespace CPSGrader {
         //second arg: current time
         virtual double compute_qnmono_upper(double start_time, double current_time){return 0;}
         virtual double compute_qnmono_lower(double start_time, double current_time){return 0;}
+
+        virtual double improved_qnmono_upper(double start_time, double current_time){return 0;}
+        virtual double improved_qnmono_lower(double start_time, double current_time){return 0;}
 
         double get_zup(double t){
             return z_up.get_value(t, 1);
@@ -317,6 +324,14 @@ namespace CPSGrader {
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
 
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            child->set_duration();
+            duration = child->duration;
+        }
+
         void print() const{
             print(cout);
         };
@@ -360,6 +375,15 @@ namespace CPSGrader {
 
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
+
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            childL->set_duration();
+            childR->set_duration();
+            duration = childL->duration>childR->duration?childL->duration:childR->duration;
+        }
 
 
         void print() const{
@@ -407,6 +431,15 @@ namespace CPSGrader {
 
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
+
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            childL->set_duration();
+            childR->set_duration();
+            duration = childL->duration>childR->duration?childL->duration:childR->duration;
+        }
 
         void print() const{
             print(cout);
@@ -489,6 +522,17 @@ namespace CPSGrader {
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
 
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            child->set_duration();
+
+            double b;
+            if (!get_param(I->end_str,b)) b = I->end;
+
+            duration = b + child->duration;
+        }
 
         void print() const{
             print(cout);
@@ -533,6 +577,18 @@ namespace CPSGrader {
 
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
+
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            child->set_duration();
+
+            double b;
+            if (!get_param(I->end_str,b)) b = I->end;
+
+            duration = b + child->duration;
+        }
 
         void print() const{
             print(cout);
@@ -636,6 +692,13 @@ namespace CPSGrader {
 
         double compute_qnmono_upper(double tau, double b);
         double compute_qnmono_lower(double tau, double b);
+
+        double improved_qnmono_upper(double tau, double b);
+        double improved_qnmono_lower(double tau, double b);
+
+        void set_duration(){
+            duration = 0;
+        }
 
         double get_z(double t, int dir){
             return z.get_value(t, dir);
