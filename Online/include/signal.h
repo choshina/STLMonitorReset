@@ -75,6 +75,7 @@ public:
 
 	static double BigM;
     static double MaxLength;
+    static double RefreshRate;
 
 	double beginTime;
 	double endTime;

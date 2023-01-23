@@ -79,26 +79,26 @@ namespace CPSGrader {
         return z_up.front().value;
     };
 
-    void and_transducer::collect_vio_epoch(vector<double>& vset, double t){
+    void and_transducer::collect_vio_epoch(vector<double>& vset, double t, double b){
         if (get_zup(t) < 0){
             if(childL->get_zup(t) < 0){
-                childL->collect_vio_epoch(vset, t);
+                childL->collect_vio_epoch(vset, t, b);
             }
 
             if(childR->get_zup(t) < 0){
-                childR->collect_vio_epoch(vset, t);
+                childR->collect_vio_epoch(vset, t, b);
             }
         }
     }
 
-    void and_transducer::collect_sat_epoch(vector<double>& sset, double t){
+    void and_transducer::collect_sat_epoch(vector<double>& sset, double t, double b){
         if (get_zlow(t) > 0){
             if(childL->get_zlow(t) > 0){
-                childL->collect_sat_epoch(sset, t);
+                childL->collect_sat_epoch(sset, t, b);
             }
 
             if(childR->get_zlow(t) > 0){
-                childR->collect_sat_epoch(sset, t);
+                childR->collect_sat_epoch(sset, t, b);
             }
         }
     }
@@ -176,27 +176,27 @@ namespace CPSGrader {
         return z_up.front().value;
     };
 
-    void or_transducer::collect_vio_epoch(vector<double>& vset, double t){
+    void or_transducer::collect_vio_epoch(vector<double>& vset, double t, double b){
         if (get_zup(t) < 0){
             if(childL->get_zup(t) < 0){
-                childL->collect_vio_epoch(vset, t);
+                childL->collect_vio_epoch(vset, t, b);
             }
 
             if(childR->get_zup(t) < 0){
-                childR->collect_vio_epoch(vset, t);
+                childR->collect_vio_epoch(vset, t, b);
             }
 
         }
     }
 
-    void or_transducer::collect_sat_epoch(vector<double>& sset, double t){
+    void or_transducer::collect_sat_epoch(vector<double>& sset, double t, double b){
         if (get_zlow(t) > 0){
             if(childL->get_zlow(t) > 0){
-                childL->collect_sat_epoch(sset, t);
+                childL->collect_sat_epoch(sset, t, b);
             }
 
             if(childR->get_zlow(t) > 0){
-                childR->collect_sat_epoch(sset, t);
+                childR->collect_sat_epoch(sset, t, b);
             }
         }
     }
@@ -303,12 +303,12 @@ namespace CPSGrader {
         return z_low.front().value;
     }
 
-    void not_transducer::collect_vio_epoch(vector<double>& vset, double t){
-        child->collect_sat_epoch(vset, t);
+    void not_transducer::collect_vio_epoch(vector<double>& vset, double t, double b){
+        child->collect_sat_epoch(vset, t, b);
     }
 
-    void not_transducer::collect_sat_epoch(vector<double>& sset, double t){
-        child->collect_vio_epoch(sset, t);
+    void not_transducer::collect_sat_epoch(vector<double>& sset, double t, double b){
+        child->collect_vio_epoch(sset, t, b);
     }
 
     double not_transducer::min_shift_vio(double t){
@@ -407,21 +407,24 @@ namespace CPSGrader {
         return z_up.front().value;
     }
 
-    void ev_transducer::collect_vio_epoch(vector<double>& vset, double t){
+    void ev_transducer::collect_vio_epoch(vector<double>& vset, double t, double b){
         if(get_zup(t) < 0){
-            for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
+            for(auto i = child->z_up.begin(); i!= child->z_up.end() && (*i).time <= t + duration ; i ++){
+//                 if((*i).time < t + child->start_time){
+//                     continue;
+//                 }
                 if(child->get_zup((*i).time) < 0){
-                    child->collect_vio_epoch(vset, (*i).time);
+                    child->collect_vio_epoch(vset, (*i).time, b);
                 }
             }
         }
     }
 
-    void ev_transducer::collect_sat_epoch(vector<double>& sset, double t){
+    void ev_transducer::collect_sat_epoch(vector<double>& sset, double t, double b){
         if(get_zlow(t) > 0){
-            for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+            for(auto i = child->z_low.begin(); i!= child->z_low.end() && (*i).time <= t + duration; i ++){
                 if(child->get_zlow((*i).time) > 0){
-                    child->collect_sat_epoch(sset, (*i).time);
+                    child->collect_sat_epoch(sset, (*i).time, b);
                 }
             }
 
@@ -459,7 +462,12 @@ namespace CPSGrader {
     double ev_transducer::compute_qnmono_upper(double tau, double b){
         //double y = get_zup(tau);
         //return y;
-        if(b > tau + duration){
+//         if(b == 15.4){
+//             cout<<  "bran: " << (b - (tau + duration)) <<endl;
+//             cout<<"zup: "<<get_zup(tau)<<endl;
+// 
+//         }
+        if(b - 0.001 > tau + duration){ //handle numerical issue
             return Signal::BigM;
         }else{
             return get_zup(tau);
@@ -468,8 +476,9 @@ namespace CPSGrader {
 
     double ev_transducer::compute_qnmono_lower(double tau, double b){
         double x = - Signal::BigM;
-        for(auto i = child->z_low.begin(); i!=child->z_low.end();i ++){
+        child->z_up.simplify();
 
+        for(auto i = child->z_low.begin(); i!=child->z_low.end();i ++){
             double y = child->compute_qnmono_lower((*i).time, b);
             if(y>x){
                 x = y;
@@ -577,35 +586,24 @@ namespace CPSGrader {
 
     }
 
-    void alw_transducer::collect_vio_epoch(vector<double>& vset, double t){
-
-        //cout<<"zup(t): " << get_zup(t) << "front:" << z_up.front() << endl;
-        if(get_zup(t) < 0){               
-//                 for(double tp = t+ a; tp <= t + b; tp ++){
-//                     if(trace_data_ptr->back().front() == 14 && tp == 11){
-//                         cout<<"tp "<< tp<<endl; 
-//                         cout<<"ab: " <<a <<"   "<<b <<endl;
-//                         cout<< "childzup(tp): "<< child->get_zup(tp)<<" " <<endl;
-//                         cout<< "childzup: "<< child->z_up<<endl;
-//                     }
-// 
-//                     if(child->get_zup(tp) < 0){
-//                         child->collect_vio_epoch(vset, tp);
-//                     }
+    void alw_transducer::collect_vio_epoch(vector<double>& vset, double t, double b){
+        if(get_zup(t) < 0){ 
+            for(auto i = child->z_up.begin(); i!= child->z_up.end() && (*i).time <= t + duration; i ++){
+//                 if((*i).time < t + child->start_time){
+//                     continue;
 //                 }
-            for(auto i = child->z_up.begin(); i!= child->z_up.end(); i ++){
                 if(child->get_zup((*i).time)<0){
-                    child->collect_vio_epoch(vset, (*i).time);
+                    child->collect_vio_epoch(vset, (*i).time, b);
                 }
             }
         }
     }
 
-    void alw_transducer::collect_sat_epoch(vector<double>& sset, double t){
+    void alw_transducer::collect_sat_epoch(vector<double>& sset, double t, double b){
         if(get_zlow(t) > 0){
-            for(auto i = child->z_low.begin(); i!= child->z_low.end(); i ++){
+            for(auto i = child->z_low.begin(); i!= child->z_low.end() && (*i).time <= t + duration ; i ++){
                 if(child->get_zlow((*i).time) > 0){
-                    child->collect_sat_epoch(sset, (*i).time);
+                    child->collect_sat_epoch(sset, (*i).time, b);
                 }
             }
         }
@@ -641,31 +639,32 @@ namespace CPSGrader {
 
     double alw_transducer::compute_qnmono_upper(double tau, double b){
         double x = Signal::BigM;
-         for(auto i = child->z_up.begin();i!=child->z_up.end();i ++){
+        child->z_up.simplify();
+         
+        for(auto i = child->z_up.begin();i!=child->z_up.end();i ++){
              double y = child->compute_qnmono_upper((*i).time, b);
-             if(b == 22.5){
-                 cout<< "t: " << (*i).time << "y: "<<y <<endl;
-             }
              if(y<x){
                  x = y;
              }
-        }
-//         for(auto i = child->start_time; i <=b ;i = i + 0.1){
-//             double y = child->compute_qnmono_upper(i, b);
-//             if(b == 22.5){
-//                 cout<<"t: "<< i << "y: "<<y <<endl;
-//             }
-//             if(y<x){
-//                 x = y;
-//             }
-//         }
-        return x;
+//              if(b == 15.3){
+// //                 cout<<"b: "<< b<<endl;
+// //                 cout<< "t: "<<(*i).time <<  "y: "  << y<<endl;
+// //                  cout << child->z_up <<endl;
+// //                  cout<<"back: "<<child->z_up.back().time <<endl;
+// //                  cout <<"endtime: " << child->z_up.endTime <<endl;
+//              }
+         }        
         
+//         if(b == 15.3|| b == 15.4 || b == 15.5){
+// //             cout<<"b: "<<b <<" x: "<<x <<endl;
+// //         }
+        return x;
+
     }
 
     double alw_transducer::compute_qnmono_lower(double tau, double b){
         //return get_zlow(tau);
-        if(b > tau + duration){
+        if(b - 0.001 > tau + duration){
             return -Signal::BigM;
         }else{
             return get_zlow(tau);

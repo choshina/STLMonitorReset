@@ -145,10 +145,10 @@ public:
     void set_epoch(const vector<double> &epo);
 
     /** return if should reset. Yes if diagnose == 2 and epoch size doesn't change*/
-    bool should_reset(const vector<double> &epo);
+    bool should_reset(const vector<double> &epo, double b);
 
     /** check if the epoch size increases*/
-    bool epoch_increase(const vector<double> &epo);
+    bool epoch_increase(const vector<double> &epo, double b);
 
     /** reset monitor*/
     void reset_monitor(double);

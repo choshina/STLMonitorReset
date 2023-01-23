@@ -69,8 +69,8 @@ namespace CPSGrader {
         //virtual void set_selected_subformula(const string &sf){}
 
         //collect vio/sat epoch
-        virtual void collect_vio_epoch(vector<double>& vset, double t){}
-        virtual void collect_sat_epoch(vector<double>& sset, double t){}
+        virtual void collect_vio_epoch(vector<double>& vset, double t, double b){}
+        virtual void collect_sat_epoch(vector<double>& sset, double t, double b){}
 
         //decide delta
         virtual double min_shift_vio(double t){return 0;}
@@ -315,8 +315,8 @@ namespace CPSGrader {
 
         double compute_upper_rob();
 
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
@@ -367,8 +367,8 @@ namespace CPSGrader {
 
         double compute_upper_rob();
 
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
@@ -423,8 +423,8 @@ namespace CPSGrader {
 
         double compute_upper_rob();
 
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
@@ -513,8 +513,8 @@ namespace CPSGrader {
         double compute_lower_rob();
         double compute_upper_rob();
 
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
@@ -569,8 +569,8 @@ namespace CPSGrader {
         double compute_lower_rob();
         double compute_upper_rob();
     
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);
@@ -684,8 +684,8 @@ namespace CPSGrader {
 
         double compute_robustness();
 
-        void collect_vio_epoch(vector<double>& vset, double t);
-        void collect_sat_epoch(vector<double>& sset, double t);
+        void collect_vio_epoch(vector<double>& vset, double t, double b);
+        void collect_sat_epoch(vector<double>& sset, double t, double b);
 
         double min_shift_vio(double t);
         double min_shift_sat(double t);

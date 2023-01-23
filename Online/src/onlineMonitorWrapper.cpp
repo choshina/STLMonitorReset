@@ -303,6 +303,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     double max_rob = mxGetScalar(MAX_ROB(S));
     Signal::BigM = max_rob;
     Signal::MaxLength = 10000;
+    Signal::RefreshRate = 0.1;
     
     // Get data addresses of I/O
     InputRealPtrsType  u        =  ssGetInputPortRealSignalPtrs(S,0);
@@ -348,7 +349,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     //int sat_epoch = 0;
 
 
-    if (stl_driver->data.size()>2) {
+    if (stl_driver->data.size()>=2) {
         transducer *phi = stl_driver->formula_map["phi"]->clone();
         phi->set_trace_data_ptr(stl_driver->data);
 
@@ -397,25 +398,25 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         if(stl_driver->diagnose  == 1){
             // collect epoch only
             if(rob_up<0){
-                phi->collect_vio_epoch(vio_set, phi->start_time);
+                phi->collect_vio_epoch(vio_set, phi->start_time, rT);
                 stl_driver->set_epoch(vio_set);
             }else if(rob_low > 0){
-                phi->collect_sat_epoch(sat_set, phi->start_time);
+                phi->collect_sat_epoch(sat_set, phi->start_time, rT);
                 stl_driver->set_epoch(sat_set);
             }
         }else if(stl_driver -> diagnose == 2){
             // collect epoch and reset
             if(rob_up < 0){
-                phi->collect_vio_epoch(vio_set, phi->start_time);
-                if(stl_driver-> should_reset(vio_set)){
+                phi->collect_vio_epoch(vio_set, phi->start_time, rT);
+                if(stl_driver-> should_reset(vio_set, rT)){
                     double delta = phi->min_shift_vio(phi->start_time);
                     stl_driver->reset_monitor(delta);
                 }else{
                     stl_driver-> set_epoch(vio_set);
                 }
             }else if(rob_low > 0){
-                phi->collect_sat_epoch(sat_set, phi->start_time);
-                if (stl_driver->should_reset(sat_set)){
+                phi->collect_sat_epoch(sat_set, phi->start_time, rT);
+                if (stl_driver->should_reset(sat_set, rT)){
                     double delta = phi->min_shift_sat(phi->start_time);
                     stl_driver->reset_monitor(delta);
                 }else{
@@ -425,21 +426,22 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         }else if(stl_driver -> diagnose == 3){
             // collect epoch and compute Boolean non-monotone semantics
             if(rob_up < 0){
-                phi->collect_vio_epoch(vio_set, phi-> start_time);
-                if(stl_driver->epoch_increase(vio_set)){
+                phi->collect_vio_epoch(vio_set, phi-> start_time, rT);
+                if(stl_driver->epoch_increase(vio_set, rT)){
                     b_nmono_up = false;
                     stl_driver -> set_epoch(vio_set);
                 }
-                if(rT == 22.4|| rT==22.5 || rT==22.6){
-                    cout<<"rT: "<<rT <<" ";
-                    for(auto i = vio_set.begin(); i!=vio_set.end(); i ++){
-                        cout<<(*i)<< " ";
-                    }
-                    cout<<endl;
-                }
+//                 if(rT == 22.4|| rT==22.5 || rT==22.6){
+//                     cout<<"rT: "<<rT <<" ";
+//                     for(auto i = vio_set.begin(); i!=vio_set.end(); i ++){
+//                         cout<<(*i)<< " ";
+//                     }
+//                     cout<<endl;
+//                 }
+                
             }else if(rob_low > 0){
-                phi->collect_sat_epoch(sat_set, phi-> start_time);
-                if(stl_driver->epoch_increase(sat_set)){
+                phi->collect_sat_epoch(sat_set, phi-> start_time, rT);
+                if(stl_driver->epoch_increase(sat_set, rT)){
                     b_nmono_low = true;
                     stl_driver -> set_epoch(sat_set);
                 }
@@ -450,6 +452,8 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             
             // report q_nmono_up
             q_nmono_up = phi->compute_qnmono_upper(phi-> start_time, rT);
+
+            //cout<<"rT: " <<rT <<"upper: " <<q_nmono_up <<endl;
 
             // report q_nmono_low
             q_nmono_low = phi->compute_qnmono_lower(phi-> start_time, rT);

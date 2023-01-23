@@ -98,14 +98,14 @@ namespace CPSGrader {
         cout << "IN: " << *this << endl;
 #endif
 
-        push_back(front());
-        pop_front();
-        while (front().time != beginTime) {
-            if( back().valueAt(front().time) != front().value || back().derivative != front().derivative ) {
-                push_back(front());
-            }
-            pop_front();
-        }
+//         push_back(front());
+//         pop_front();
+//         while (front().time != beginTime) {
+//             if( back().valueAt(front().time) != front().value || back().derivative != front().derivative ) {
+//                 push_back(front());
+//             }
+//             pop_front();
+//         }
 
         // check last sample
         if (back().time < endTime)

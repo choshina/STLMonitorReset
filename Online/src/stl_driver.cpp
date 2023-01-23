@@ -19,6 +19,7 @@ map<string, token_type> STLDriver::reserved = map<string,token_type>(); // fille
 
 double Signal::BigM = 100.;
 double Signal::MaxLength = 10000;
+double Signal::RefreshRate = 0.1;
 //vector<vector<double>> *transducer::trace_data_ptr = nullptr;
 
 STLDriver::STLDriver()
@@ -406,21 +407,16 @@ void STLDriver::set_epoch(const vector<double> &epo){
 //     return should_reset;
 }
 
-bool STLDriver::should_reset(const vector<double> &epo){
-    int old_size = epoch.size();
-    int new_size = epo.size();
+bool STLDriver::should_reset(const vector<double> &epo, double b){
 
-    return (new_size == old_size && diagnose == 2);
+    return (!epoch_increase(epo, b) && diagnose == 2);
     //here we don't have to guarantee new_size or old_size > 0,
     //because this method is only called when robust < 0,
     //i.e., epoch size must be larger than 0
 }
 
-bool STLDriver::epoch_increase(const vector<double> &epo){
-    int old_size = epoch.size();
-    int new_size = epo.size();
-    
-    return new_size > old_size;
+bool STLDriver::epoch_increase(const vector<double> &epo, double b){
+    return std::find(epo.begin(), epo.end(), b) != epo.end();
 }
 
 void STLDriver::reset_monitor(double v_shift){
