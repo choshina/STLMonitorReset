@@ -430,6 +430,13 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
                     b_nmono_up = false;
                     stl_driver -> set_epoch(vio_set);
                 }
+                if(rT == 22.4|| rT==22.5 || rT==22.6){
+                    cout<<"rT: "<<rT <<" ";
+                    for(auto i = vio_set.begin(); i!=vio_set.end(); i ++){
+                        cout<<(*i)<< " ";
+                    }
+                    cout<<endl;
+                }
             }else if(rob_low > 0){
                 phi->collect_sat_epoch(sat_set, phi-> start_time);
                 if(stl_driver->epoch_increase(sat_set)){
@@ -505,8 +512,9 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         xd[LOW_IDX] = q_nmono_low;
     }
 
-    cout<<rT<<" " <<b_nmono_up<<" "<<b_nmono_low<<endl;
+    //cout<<rT<<" " <<b_nmono_up<<" "<<b_nmono_low<<endl;
     //cout<< "data:" <<xd[UP_IDX] <<" " <<xd[LOW_IDX] << " "<<xd[NMUP_IDX] <<" "<<xd[NMLOW_IDX]<<endl;
+    //cout<< "rT: " << rT <<endl;
 }
 
 

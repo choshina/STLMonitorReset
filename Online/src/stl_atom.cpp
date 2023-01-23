@@ -95,11 +95,11 @@ namespace CPSGrader {
     }
 
     double stl_atom::improved_qnmono_upper(double tau, double b){
-        compute_qnmono_upper(tau, b);
+        return compute_qnmono_upper(tau, b);
     }
 
     double stl_atom::improved_qnmono_lower(double tau, double b){
-        compute_qnmono_lower(tau, b);
+        return compute_qnmono_lower(tau, b);
     }
 
     
