@@ -319,8 +319,14 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
     double rT = (double)T;
     rT = (int)(rT*10 + 0.5); //refresh rate = 0.1
     rT = (double)rT/10;
+    double rrT = rT;
     rT = rT - stl_driver->sum_shift; // calibrate the time stamp
 
+    //handle numerical issue
+    if(rT == 0){
+        stl_driver->old_qnmono_up = Signal::BigM;
+        stl_driver->old_qnmono_low = - Signal::BigM;
+    }
 
     vector<double> points;
     //points.push_back(T);
@@ -357,6 +363,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
         //phi->set_selected_subformula(stl_driver->sub_form);
         
         rob_up  = phi->compute_upper_rob();
+
         rob_low = phi->compute_lower_rob();
 
         vector<double> vio_set;
@@ -392,7 +399,6 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
 
 
 
-
 //== from here, the code of CAV'23
 //
         if(stl_driver->diagnose  == 1){
@@ -408,9 +414,34 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             // collect epoch and reset
             if(rob_up < 0){
                 phi->collect_vio_epoch(vio_set, phi->start_time, rT);
+//                 if(rrT == 8.6 || rrT == 8.7 || rrT == 8.8){
+//                     cout<< "rT" << rT <<" rrT : " << rrT << " ";
+//                     for(auto i = vio_set.begin(); i!=vio_set.end(); i ++){
+//                         cout<<(*i)<< " ";
+//                     }
+//                     cout<<endl;                
+//                 }
                 if(stl_driver-> should_reset(vio_set, rT)){
+                    
                     double delta = phi->min_shift_vio(phi->start_time);
+                    //delta = 12.1;
+//                     if(rT >15 &&rT<15.4){
+//                        auto ii = phi->trace_data_ptr->end();
+//                         auto jj = (*ii).begin();
+//                        cout<< " before : " << stl_driver->data.size() << "rT" << rT << " " << (*jj)  <<endl;
+//                         
+//                     }
                     stl_driver->reset_monitor(delta);
+//                     if(rT >15 &&rT<15.4){
+//                        //cout<<"rT: " << rT << " yes "  << rob_up << " delta: "<< delta <<endl;
+//                        //cout<< stl_driver->data.size() <<endl;
+//                        cout << "rT " << rT << " rob: " <<phi->compute_upper_rob() << "===finish===" <<endl;
+//                     }
+//                     if(rrT == 15.3){
+//                         cout<< "rrt15.3 " <<stl_driver->data.size() << " rob: " <<phi->compute_upper_rob()<<endl;
+//                     }
+                    //cout <<"rrT: " <<rrT <<" delta: " << delta << endl;
+                    //
                 }else{
                     stl_driver-> set_epoch(vio_set);
                 }
@@ -419,6 +450,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
                 if (stl_driver->should_reset(sat_set, rT)){
                     double delta = phi->min_shift_sat(phi->start_time);
                     stl_driver->reset_monitor(delta);
+                
                 }else{
                     stl_driver-> set_epoch(sat_set);
                 }
@@ -431,8 +463,8 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
                     b_nmono_up = false;
                     stl_driver -> set_epoch(vio_set);
                 }
-//                 if(rT == 22.4|| rT==22.5 || rT==22.6){
-//                     cout<<"rT: "<<rT <<" ";
+//                 if(rT == 10 || rT == 10.1){
+//                     cout<<"rT: "<<rT <<" b_nmono_up: " << b_nmono_up<<endl;
 //                     for(auto i = vio_set.begin(); i!=vio_set.end(); i ++){
 //                         cout<<(*i)<< " ";
 //                     }
@@ -452,11 +484,20 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             
             // report q_nmono_up
             q_nmono_up = phi->compute_qnmono_upper(phi-> start_time, rT);
+            if(q_nmono_up == Signal::BigM){ //to handle numerical issue
+                q_nmono_up = stl_driver -> old_qnmono_up;
+            }
+            stl_driver->old_qnmono_up = q_nmono_up;
 
             //cout<<"rT: " <<rT <<"upper: " <<q_nmono_up <<endl;
 
             // report q_nmono_low
             q_nmono_low = phi->compute_qnmono_lower(phi-> start_time, rT);
+            if(q_nmono_low == -Signal::BigM){ //to handle numerical issue
+                q_nmono_low = stl_driver -> old_qnmono_low;
+            }
+            stl_driver -> old_qnmono_low = q_nmono_low;
+
             //cout<<"debug: " << q_nmono_up << " " <<endl;
         }else if(stl_driver -> diagnose == 5){
             // a more efficient version of Mode 4
@@ -511,7 +552,7 @@ static void mdlUpdate(SimStruct *S, int_T tid) {
             xd[UP_IDX] = 0;
             xd[LOW_IDX] = 0;
         }
-    }else if(stl_driver->diagnose == 4 || stl_driver->diagnose == 5){
+    }else if(stl_driver->diagnose == 4){
         xd[UP_IDX] = q_nmono_up;
         xd[LOW_IDX] = q_nmono_low;
     }
@@ -550,8 +591,9 @@ static void mdlTerminate(SimStruct *S)
     // Retrieve and destroy C++ object
 
     STLDriver *stl_driver = static_cast<STLDriver *>(ssGetPWork(S)[0]);
-    cout<< "reset nums: " << stl_driver->num_reset <<endl;
-    cout<< "block time cost: " << stl_driver->elapse_time <<endl;
+    //cout<< "reset nums: " << stl_driver->num_reset <<endl;
+    //cout<< "block time cost: " << stl_driver->elapse_time <<endl;
+    cout<< stl_driver->elapse_time << " ";
     delete stl_driver;
 }
 

@@ -416,7 +416,8 @@ bool STLDriver::should_reset(const vector<double> &epo, double b){
 }
 
 bool STLDriver::epoch_increase(const vector<double> &epo, double b){
-    return std::find(epo.begin(), epo.end(), b) != epo.end();
+    //return std::find(epo.begin(), epo.end(), b) != epo.end();
+    return epo.size() > epoch.size();
 }
 
 void STLDriver::reset_monitor(double v_shift){
@@ -427,7 +428,7 @@ void STLDriver::reset_monitor(double v_shift){
     
     vector<vector<double>> new_data;
     for(auto ii = data.begin(); ii!= data.end(); ii++){
-        if((*ii).front() >= shift - 0.02){ //mitigate the numerical error
+        if((*ii).front() >= shift - 0.002){ //mitigate the numerical error
             vector<double> pp;
             pp.push_back((*ii).front() - shift);
             for(auto jj = (*ii).begin() + 1; jj!= (*ii).end(); jj ++){

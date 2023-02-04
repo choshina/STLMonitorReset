@@ -107,6 +107,15 @@ namespace CPSGrader {
 //             pop_front();
 //         }
 
+        //my code start 
+//         while (front().time != beginTime) {
+//             if(){
+//             
+//             }
+//             pop_front();
+//         }
+        //my code end
+
         // check last sample
         if (back().time < endTime)
             push_back(Sample(endTime, back().valueAt(endTime), 0.));
@@ -116,6 +125,28 @@ namespace CPSGrader {
         printf("<<<Signal::simplify:                          OUT.\n";
 #endif
     }
+
+// //my own code for making time of signal 0.1
+//      void Signal::calibrate() {
+// 
+//         //push_back(front());
+//         //pop_front();
+//         while (front().time != beginTime) {
+//             //if( back().valueAt(front().time) != front().value || back().derivative != front().derivative ) {
+//                 //push_back(front());
+//             //}
+//             double t = front().time;
+//             int t_ = (int)t*10;
+//             push_back(front());
+//             pop_front();
+//         }
+// 
+//         // check last sample
+// //         if (back().time < endTime)
+// //             push_back(Sample(endTime, back().valueAt(endTime), 0.));
+// 
+//     }
+
 
     void Signal::resize(double s, double t, double v) {
         // Resize signal to begin at time s and end at time t 

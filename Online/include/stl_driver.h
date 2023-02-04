@@ -122,6 +122,10 @@ public:
     /** cumulated shift*/
     double sum_shift;
 
+    /** remember the last output value, to handle numerical issue*/
+    double old_qnmono_up;
+    double old_qnmono_low;
+
 	/// CONSTRUCTORS
 
 	/** construct a new parser driver context */

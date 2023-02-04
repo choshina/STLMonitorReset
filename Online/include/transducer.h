@@ -98,6 +98,7 @@ namespace CPSGrader {
         virtual double compute_lower_rob();
         virtual double compute_upper_rob();
 
+
         // update quantitative semantics based on new data
         virtual double update_robustness();
         virtual double update_lower_rob(){return 0.;};
@@ -568,6 +569,8 @@ namespace CPSGrader {
         double compute_robustness();
         double compute_lower_rob();
         double compute_upper_rob();
+       
+        
     
         void collect_vio_epoch(vector<double>& vset, double t, double b);
         void collect_sat_epoch(vector<double>& sset, double t, double b);

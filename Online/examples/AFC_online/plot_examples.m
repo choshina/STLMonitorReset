@@ -24,12 +24,16 @@ d = 3;
 
 BrAFC.ResetSimulations();
 BrAFC.SetParam({'Pedal_Angle_pulse_period', 'Pedal_Angle_pulse_amp', 'Engine_Speed_u0','Engine_Speed_u1','Engine_Speed_u2'}, input);
-BrAFC.SetParam({'max_rob', 'diagnoser'}, [1, d]);
+BrAFC.SetParam({'max_rob', 'diagnoser'}, [0.5, d]);
+
+% BrAFC.ResetSimulations();
+% BrAFC.Sim(0:.1:50);
+
 times = 1;
 tic
 for i = 1:times
     BrAFC.ResetSimulations();
-    BrAFC.Sim(0:.1:50) 
+    BrAFC.Sim(0:.1:50);
 end
 
 simTime = toc;
@@ -41,24 +45,67 @@ t = Trace{1}.time;
 
 %% 
 close 
-figure;
+figure(1);
 subplot(3,1,1)
 
-plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'LineWidth', 2);
+%plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'b', 'LineWidth', 2);
+plot(t,Trace{1}.X(1,:)',t(2:end),Trace{1}.X(2,2:end)', 'b', 'LineWidth', 2);
 set(gca, 'LineWidth', 2, 'FontSize',18)
+%set(gcf,'position',[10,10,200,200])
+
 
 legend({'AF','AFref'});
 grid on;
+xlim([0 50]);
+xticks(0:5:50);
 
 g = title(phi_AFC);
 set(g,'Interpreter','None')
 subplot(3,1,[2 3]);
 hold on;
-stairs(t, Trace{1}.X(idx(2),:)', 'g', 'LineWidth', 2);
-stairs(t, Trace{1}.X(idx(1),:)', 'r', 'LineWidth', 2);
-set(gca, 'LineWidth', 2, 'FontSize',10)
-legend({'Upper robustness','Lower robustness'});
-plot(t,0*t,'k')
+
+
+if d== 3
+    tr = [];
+    u = Trace{1}.X(idx(2),:);
+    l = Trace{1}.X(idx(1),:);
+    for i = 1:numel(t)
+        if u(i) < 0
+            tr = [tr -1];
+        elseif l(i) > 0
+            tr = [tr 1];
+        else
+            tr = [tr 0];
+        end
+    end
+    plot(t, tr, 'LineWidth', 2);
+    set(gca, 'LineWidth', 2, 'FontSize',18)
+else
+    stairs(t, Trace{1}.X(idx(2),:)',  'LineWidth', 2);
+    stairs(t, Trace{1}.X(idx(1),:)',  'LineWidth', 2);
+end
+
+set(gca, 'LineWidth', 2, 'FontSize',18)
+set(gcf,'position',[10,10,800,500])
+%set(gcf,'position',[10,10,800,250])
+xlim([0 50]);
+xticks(0:5:50);
+if d == 3
+    ylim([-1 1]);
+else
+    ylim([-0.5 0.5]);
+    yticks(-0.5:0.5:0.5);
+end
+
+if d == 4
+    legend({'Violation causation distance','Satisfaction causation distance'});
+elseif d == 3
+    legend({'Boolean causation monitor verdict'})
+else
+    legend({'Upper robustness','Lower robustness'});
+end
+
+%plot(t,0*t,'k')
 grid on;
 
 %%
